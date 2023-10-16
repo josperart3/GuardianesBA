@@ -50,11 +50,11 @@ public class DefaultWebSecurityConfig {
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		/**
-		 * Configuración básica de filtro para saml
+		 * Configuración básica de filtro para oauth
 		 */
-		http.authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())
-			.saml2Login(withDefaults())
-			.saml2Logout(withDefaults());
+		http
+		.authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
+		.oauth2Login(withDefaults());
 
 		return http.build();
 	}
