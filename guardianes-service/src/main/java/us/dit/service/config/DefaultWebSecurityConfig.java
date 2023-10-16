@@ -50,37 +50,13 @@ public class DefaultWebSecurityConfig {
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		/**
-		 * Configuro el constructor de un objeto
-		 * org.springframework.security.config.annotation.web.builders.HttpSecurity
-		 * https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/config/annotation/web/builders/HttpSecurity.html#authorizeHttpRequests(org.springframework.security.config.Customizer)
+		 * Configuración básica de filtro para saml
 		 */
-		http.authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
-				.antMatchers("/rest/*", "/procesohola/nuevo", "/myTasks/*", "/myTasks").authenticated().antMatchers("/*", "/img/*")
-				.permitAll())
-				.exceptionHandling((exceptionHandling) -> exceptionHandling.accessDeniedPage("/access-denied.html"))
-				.csrf((csrf) -> csrf.disable()).httpBasic(withDefaults()).cors(withDefaults())
-				.formLogin(withDefaults());
+		http.authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())
+			.saml2Login(withDefaults())
+			.saml2Logout(withDefaults());
+
 		return http.build();
-	}
-
-	/**
-	 * Configuración de la autenticación con autenticación en memoria y encriptada
-	 **/
-
-	@Bean
-	UserDetailsService userDetailsService(BCryptPasswordEncoder encoder) {
-
-		// codifico las password en https://bcrypt-generator.com/, uso nombre como
-		// password
-		// $2a$12$Pa3IIDS5JhAJpiLt5/lT4O5KVw1pyU.dVGpz/q7kEGUAH.JL85tRC
-		UserDetails user = User.withUsername("user").password(encoder.encode("user")).roles("kie-server").build();
-		// $2a$12$irR0VcP4SdtvAn7cbnXXQ.Cnfk/NlLWZa4mnx0J8EeXFum8Pt1pfm
-		UserDetails wbadmin = User.withUsername("wbadmin").password(encoder.encode("wbadmin")).roles("admin").build();
-		// $2a$12$1T7IYm0PmxpWyJFjqTSlm.489.s65TvHJbW4R7d1SG0giNHb5bqAm
-		UserDetails kieserver = User.withUsername("kieserver").password(encoder.encode("kieserver")).roles("kie-server")
-				.build();
-
-		return new InMemoryUserDetailsManager(wbadmin, user, kieserver);
 	}
 
 	@Bean
@@ -112,54 +88,47 @@ public class DefaultWebSecurityConfig {
 	ClearPasswordService clearPasswordService() {
 		return new InMemoryPasswordService();
 	}
-	/**Este filtro está sacado de https://www.baeldung.com/spring-security-saml
-	 * para SSO
+	/**
+	 * Este filtro está sacado de https://www.baeldung.com/spring-security-saml para
+	 * SSO
 	 * 
-	 * Saml2MetadataFilter filter = new Saml2MetadataFilter(relyingPartyRegistrationResolver, new OpenSamlMetadataResolver());
-
-		http.authorizeHttpRequests(authorize -> authorize.anyRequest()
-  		.authenticated())
-  		.saml2Login(withDefaults())
-  		.saml2Logout(withDefaults())
- 		.addFilterBefore(filter, Saml2WebSsoAuthenticationFilter.class);
-
-		return http.build();
-		Y este de https://docs.spring.io/spring-security/reference/servlet/saml2/login/overview.html
-		@Bean
-		public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-  		  http
-       	 .authorizeHttpRequests(authorize -> authorize
-            .anyRequest().authenticated())
-        .saml2Login(withDefaults()
-		.saml2Logout(withDefaults());
- 		   return http.build();
-		}
-		Otro ejemplo
-		@Value("${private.key}") RSAPrivateKey key;
-		@Value("${public.certificate}") X509Certificate certificate;
-
-		@Bean
-		RelyingPartyRegistrationRepository registrations() {
-			Saml2X509Credential credential = Saml2X509Credential.signing(key, certificate);
-		RelyingPartyRegistration registration = RelyingPartyRegistrations
-            .fromMetadataLocation("https://ap.example.org/metadata")
-            .registrationId("id")
-            .singleLogoutServiceLocation("{baseUrl}/logout/saml2/slo")
-            .signingX509Credentials((signing) -> signing.add(credential))
-            .build();
- 	   return new InMemoryRelyingPartyRegistrationRepository(registration);
-		}
-
-		@Bean
-		SecurityFilterChain web(HttpSecurity http, RelyingPartyRegistrationRepository registrations) throws Exception {
-  		  http
-       		.authorizeHttpRequests((authorize) -> authorize
-            .anyRequest().authenticated())
-        	.saml2Login(withDefaults())
-        	.saml2Logout(withDefaults());
-
-    		return http.build();
-}
+	 * Saml2MetadataFilter filter = new
+	 * Saml2MetadataFilter(relyingPartyRegistrationResolver, new
+	 * OpenSamlMetadataResolver());
+	 * 
+	 * http.authorizeHttpRequests(authorize -> authorize.anyRequest()
+	 * .authenticated()) .saml2Login(withDefaults()) .saml2Logout(withDefaults())
+	 * .addFilterBefore(filter, Saml2WebSsoAuthenticationFilter.class);
+	 * 
+	 * return http.build(); Y este de
+	 * https://docs.spring.io/spring-security/reference/servlet/saml2/login/overview.html
+	 * 
+	 * @Bean public SecurityFilterChain filterChain(HttpSecurity http) throws
+	 *       Exception { http .authorizeHttpRequests(authorize -> authorize
+	 *       .anyRequest().authenticated()) .saml2Login(withDefaults()
+	 *       .saml2Logout(withDefaults()); return http.build(); }
+	 *       
+	 * Otro
+	 * ejemplo 
+	 * 
+	 * @Value("${private.key}") RSAPrivateKey key; 
+	 * @Value("${public.certificate}") X509Certificate certificate;
+	 * 
+	 * @Bean RelyingPartyRegistrationRepository registrations() {
+	 *       Saml2X509Credential credential = Saml2X509Credential.signing(key,certificate); 
+	 *       RelyingPartyRegistration registration =  RelyingPartyRegistrations
+	 *       .fromMetadataLocation("https://ap.example.org/metadata")
+	 *       .registrationId("id")
+	 *       .singleLogoutServiceLocation("{baseUrl}/logout/saml2/slo")
+	 *       .signingX509Credentials((signing) -> signing.add(credential)) .build();
+	 *       return new InMemoryRelyingPartyRegistrationRepository(registration); }
+	 * 
+	 * @Bean SecurityFilterChain web(HttpSecurity http,
+	 *       RelyingPartyRegistrationRepository registrations) throws Exception {
+	 *       http .authorizeHttpRequests((authorize) -> authorize
+	 *       .anyRequest().authenticated()) .saml2Login(withDefaults())
+	 *       .saml2Logout(withDefaults());
+	 * 
+	 *       return http.build(); }
 	 */
-
 }

@@ -3,6 +3,7 @@ package us.dit.service.services;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.kie.server.api.marshalling.MarshallingFormat;
+import org.kie.server.client.CredentialsProvider;
 import org.kie.server.client.KieServicesClient;
 import org.kie.server.client.KieServicesConfiguration;
 import org.kie.server.client.KieServicesFactory;
@@ -10,8 +11,11 @@ import org.kie.server.client.ProcessServicesClient;
 import org.kie.server.client.QueryServicesClient;
 import org.kie.server.client.UserTaskServicesClient;
 import org.kie.server.client.admin.UserTaskAdminServicesClient;
+import org.kie.server.client.credentials.EnteredTokenCredentialsProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import us.dit.service.services.KieUtilService;
 
 //import org.springframework.stereotype.Service;
 /**
@@ -29,8 +33,12 @@ public class KieUtil implements KieUtilService {
 	private static final Logger logger = LogManager.getLogger();
 	private String USERNAME;
 	private String PASSWORD;
+	private String CREDENTIALS;
 
 	private KieServicesConfiguration config;
+	public KieUtil(String credentials) {
+		CREDENTIALS=credentials;
+	}
 
 	public KieUtil(String uRL, String uSERNAME, String pASSWORD) {
 		logger.info("Creando el kieutil");
@@ -80,7 +88,12 @@ public class KieUtil implements KieUtilService {
 
 	private KieServicesClient getKieServicesClient() {
 		logger.info("entro en getkieservicesclient con url " + URL);
-		config = KieServicesFactory.newRestConfiguration(URL, USERNAME, PASSWORD);
+		if(CREDENTIALS!=null) {
+			CredentialsProvider credentials=new EnteredTokenCredentialsProvider(CREDENTIALS);
+			KieServicesFactory.newRestConfiguration(URL, credentials);
+		}else if(USERNAME!=null && PASSWORD!=null) {
+			config = KieServicesFactory.newRestConfiguration(URL, USERNAME, PASSWORD);
+			}
 		logger.info("salgo de newrestconfigurarion");
 		config.setMarshallingFormat(MarshallingFormat.JSON);
 
