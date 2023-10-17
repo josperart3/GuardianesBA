@@ -33,11 +33,11 @@ public class KieUtil implements KieUtilService {
 	private static final Logger logger = LogManager.getLogger();
 	private String USERNAME;
 	private String PASSWORD;
-	private String CREDENTIALS;
+	private String TOKEN;
 
 	private KieServicesConfiguration config;
-	public KieUtil(String credentials) {
-		CREDENTIALS=credentials;
+	public KieUtil(String token) {
+		TOKEN=token;
 	}
 
 	public KieUtil(String uRL, String uSERNAME, String pASSWORD) {
@@ -88,8 +88,8 @@ public class KieUtil implements KieUtilService {
 
 	private KieServicesClient getKieServicesClient() {
 		logger.info("entro en getkieservicesclient con url " + URL);
-		if(CREDENTIALS!=null) {
-			CredentialsProvider credentials=new EnteredTokenCredentialsProvider(CREDENTIALS);
+		if(TOKEN!=null) {
+			CredentialsProvider credentials=new EnteredTokenCredentialsProvider(TOKEN);
 			KieServicesFactory.newRestConfiguration(URL, credentials);
 		}else if(USERNAME!=null && PASSWORD!=null) {
 			config = KieServicesFactory.newRestConfiguration(URL, USERNAME, PASSWORD);

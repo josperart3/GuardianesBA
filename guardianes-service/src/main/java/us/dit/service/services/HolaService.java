@@ -19,9 +19,9 @@ public class HolaService {
 	@Value("${kieserver.location}")
 	private String URL;
 
-	public Long nuevaInstancia(String credentials) {
+	public Long nuevaInstancia(String token) {
 		
-		KieUtilService kie = new KieUtil(URL,credentials);
+		KieUtilService kie = new KieUtil(token);
 		ProcessServicesClient client = kie.getProcessServicesClient();
 		Long idInstanceProcess = client.startProcess("guardianes-kjar-1.0-SNAPSHOT", "guardianes-kjar.prueba");
 		logger.info("conseguido??? " + idInstanceProcess.toString());
