@@ -6,6 +6,8 @@ import us.dit.service.model.validation.annotations.ValidScheduleDay;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.Range;
+import org.optaplanner.core.api.domain.entity.PlanningEntity;
+import org.optaplanner.core.api.domain.variable.PlanningVariable;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -16,6 +18,7 @@ import java.util.Set;
  * 
  * @author miggoncan
  */
+@PlanningEntity
 @Data
 //This annotations are used instead of @Data as the default hashcode() method 
 //would case an infinite loop between schedule.hashcode() and 
@@ -47,13 +50,16 @@ public class ScheduleDay extends AbstractDay {
 	@NotNull
 	private Boolean isWorkingDay;
 	
+	@PlanningVariable(valueRangeProviderRefs="DoctorsRange")
 	@ManyToMany
 	@NotEmpty
 	private Set<Doctor> cycle;
-	
+
+	@PlanningVariable(valueRangeProviderRefs="DoctorsRange")
 	@ManyToMany
 	private Set<Doctor> shifts;
 	
+	@PlanningVariable(valueRangeProviderRefs="DoctorsRange")
 	@ManyToMany
 	private Set<Doctor> consultations;
 	

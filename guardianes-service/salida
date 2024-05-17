@@ -1,0 +1,69 @@
+Running with user input: "clean install -Ppostgres .txt"
+Running maven build on available project
+===============================================================================
+guardianes-model
+===============================================================================
+===============================================================================
+guardianes-kjar
+===============================================================================
+===============================================================================
+guardianes-service
+===============================================================================
+"Launching the application locally..."
+ :'######:::'##::::'##::::'###::::'########::'########::'####::::'###::::'##::: ##:'########::'######::
+ '##... ##:: ##:::: ##:::'## ##::: ##.... ##: ##.... ##:. ##::::'## ##::: ###:: ##: ##.....::'##... ##:
+  ##:::..::: ##:::: ##::'##:. ##:: ##:::: ##: ##:::: ##:: ##:::'##:. ##:: ####: ##: ##::::::: ##:::..::
+  ##::'####: ##:::: ##:'##:::. ##: ########:: ##:::: ##:: ##::'##:::. ##: ## ## ##: ######:::. ######::
+  ##::: ##:: ##:::: ##: #########: ##.. ##::: ##:::: ##:: ##:: #########: ##. ####: ##...:::::..... ##:
+  ##::: ##:: ##:::: ##: ##.... ##: ##::. ##:: ##:::: ##:: ##:: ##.... ##: ##:. ###: ##:::::::'##::: ##:
+ . ######:::. #######:: ##:::: ##: ##:::. ##: ########::'####: ##:::: ##: ##::. ##: ########:. ######::
+:......:::::.......:::..:::::..::..:::::..::........:::....::..:::::..::..::::..::........:::......:::
+			 ::::::'##:'########::'########::'##::::'##::::::::::'########:::::'###::::                            
+			 :::::: ##: ##.... ##: ##.... ##: ###::'###:::::::::: ##.... ##:::'## ##:::                            
+			 :::::: ##: ##:::: ##: ##:::: ##: ####'####:::::::::: ##:::: ##::'##:. ##::                            
+			 :::::: ##: ########:: ########:: ## ### ##:'#######: ########::'##:::. ##:                            
+			 '##::: ##: ##.... ##: ##.....::: ##. #: ##:........: ##.... ##: #########:                            
+			  ##::: ##: ##:::: ##: ##:::::::: ##:.:: ##:::::::::: ##:::: ##: ##.... ##:                            
+			 . ######:: ########:: ##:::::::: ##:::: ##:::::::::: ########:: ##:::: ##:                            
+			 :......:::........:::..:::::::::..:::::..:::::::::::........:::..:::::..::    
+
+                                      guardianes-service :: v.1.0-SNAPSHOT       
+
+
+
+
+
+                 
+2024-05-14 17:46:58.687  INFO 29212 --- [           main] us.dit.service.Application               : Starting Application v1.0-SNAPSHOT using Java 18.0.2.1 on Lince with PID 29212 (D:\codigo\RepositoriosGIT\GuardianesBA\guardianes-service\target\guardianes-service-1.0-SNAPSHOT.jar started by isa in D:\codigo\RepositoriosGIT\GuardianesBA\guardianes-service)
+2024-05-14 17:46:58.693  INFO 29212 --- [           main] us.dit.service.Application               : No active profile set, falling back to 1 default profile: "default"
+2024-05-14 17:47:00.388  INFO 29212 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2024-05-14 17:47:00.545  INFO 29212 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 141 ms. Found 10 JPA repository interfaces.
+¨Desea terminar el trabajo por lotes (S/N)? 
+2024-05-14 17:47:01.923  INFO 29212 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8090 (http)
+2024-05-14 17:47:02.037  INFO 29212 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 3266 ms
+2024-05-14 17:47:02.457  INFO 29212 --- [           main] com.arjuna.ats.jbossatx                  : ARJUNA032010: JBossTS Recovery Service (tag: 50ca2663d1db9b2625e2c5b6a8f92516597d752e) - JBoss Inc.
+2024-05-14 17:47:02.524  INFO 29212 --- [           main] com.arjuna.ats.jbossatx                  : ARJUNA032013: Starting transaction recovery manager
+2024-05-14 17:47:02.655  INFO 29212 --- [           main] o.d.p.api.TransactionManagerFactory      : Using org.kie.spring.persistence.KieSpringTransactionManagerFactory@5167268
+2024-05-14 17:47:02.766  INFO 29212 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: org.jbpm.domain]
+2024-05-14 17:47:02.937  INFO 29212 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 5.6.15.Final
+2024-05-14 17:47:03.275  INFO 29212 --- [           main] o.hibernate.annotations.common.Version   : HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2024-05-14 17:47:04.943  INFO 29212 --- [           main] org.hibernate.dialect.Dialect            : HHH000400: Using dialect: org.hibernate.dialect.PostgreSQLDialect
+2024-05-14 17:47:05.019  INFO 29212 --- [           main] org.hibernate.orm.beans                  : HHH10005002: No explicit CDI BeanManager reference was passed to Hibernate, but CDI is available on the Hibernate ClassLoader.
+2024-05-14 17:47:07.355  INFO 29212 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.JBossStandAloneJtaPlatform]
+2024-05-14 17:47:08.549  WARN 29212 --- [           main] o.h.dialect.function.TemplateRenderer    : HHH000174: Function template anticipated 4 arguments, but 1 arguments encountered
+2024-05-14 17:47:08.549  WARN 29212 --- [           main] o.h.dialect.function.TemplateRenderer    : HHH000174: Function template anticipated 4 arguments, but 1 arguments encountered
+2024-05-14 17:47:08.660  INFO 29212 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'org.jbpm.domain'
+2024-05-14 17:47:08.682  INFO 29212 --- [           main] u.d.s.config.SystemPropertiesInjector    : Injecting Property with Name: org.kie.server.bypass.auth.user and Value: true into System Properties
+2024-05-14 17:47:08.683  INFO 29212 --- [           main] u.d.s.config.SystemPropertiesInjector    : Injecting Property with Name: org.kie.server.pwd and Value: guardianes into System Properties
+2024-05-14 17:47:08.683  INFO 29212 --- [           main] u.d.s.config.SystemPropertiesInjector    : Injecting Property with Name: org.kie.server.user and Value: guardianes into System Properties
+2024-05-14 17:47:08.693  INFO 29212 --- [           main] us.dit.service.services.KieUtil          : Creando el kieutil con los valores por defecto user nullpwd: null
+2024-05-14 17:47:10.266  INFO 29212 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@7e8c58fd, org.springframework.security.web.context.SecurityContextPersistenceFilter@519b0f00, org.springframework.security.web.header.HeaderWriterFilter@5c13af01, org.springframework.web.filter.CorsFilter@11ce9319, org.springframework.security.web.authentication.logout.LogoutFilter@6fc28e5b, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@3dd591b9, org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter@31dbf5bb, org.springframework.security.web.authentication.ui.DefaultLogoutPageGeneratingFilter@780c0, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@7977f046, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@217b0952, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@36330be8, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@1b3bb287, org.springframework.security.web.session.SessionManagementFilter@47c5cbf2, org.springframework.security.web.access.ExceptionTranslationFilter@264576e4, org.springframework.security.web.access.intercept.AuthorizationFilter@19c1f6f4]
+2024-05-14 17:47:10.404  WARN 29212 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2024-05-14 17:47:10.867  INFO 29212 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2024-05-14 17:47:11.832  INFO 29212 --- [           main] o.k.i.pmml.PMMLImplementationsUtil       : Using NEW implementation
+2024-05-14 17:47:11.835  INFO 29212 --- [           main] o.k.i.pmml.PMMLImplementationsUtil       : Using NEW implementation
+2024-05-14 17:47:11.851  INFO 29212 --- [           main] o.d.p.api.TransactionManagerFactory      : Using org.kie.spring.persistence.KieSpringTransactionManagerFactory@282c5075
+2024-05-14 17:47:12.440  INFO 29212 --- [           main] com.arjuna.ats.arjuna                    : ARJUNA012170: TransactionStatusManager started on port 60957 and host 127.0.0.1 with service com.arjuna.ats.arjuna.recovery.ActionStatusService
+2024-05-14 17:47:12.441  WARN 29212 --- [           main] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'queryService' defined in class path resource [org/jbpm/springboot/autoconfigure/JBPMAutoConfiguration.class]: Bean instantiation via factory method failed; nested exception is org.springframework.beans.BeanInstantiationException: Failed to instantiate [org.jbpm.services.api.query.QueryService]: Factory method 'queryService' threw exception; nested exception is java.lang.ExceptionInInitializerError
+2024-05-14 17:47:12.449  INFO 29212 --- [           main] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'org.jbpm.domain'
+2024-05-14 17:47:12.450  INFO 29212 --- [           main] com.arjuna.ats.jbossatx                  : ARJUNA032014: Stopping transaction recovery manager

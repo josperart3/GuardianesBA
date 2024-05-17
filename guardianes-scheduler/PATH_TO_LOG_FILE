@@ -1,0 +1,12 @@
+2024-05-14 17:42:12,710 [INFO] main - Starting main program
+2024-05-14 17:42:12,730 [INFO] main - Generating the schedule
+2024-05-14 17:42:12,731 [INFO] scheduler.schedule - Generating schedule for 2024-6
+2024-05-14 17:42:12,764 [INFO] scheduler.schedule - Starting the solver
+2024-05-14 17:42:12,847 [INFO] scheduler.schedule - The solution found is optimal or feasible
+2024-05-14 17:42:12,850 [INFO] main - Finishing the main program
+2024-05-14 17:50:46,489 [INFO] main - Starting main program
+2024-05-14 17:50:46,502 [INFO] main - Generating the schedule
+2024-05-14 17:50:46,502 [INFO] scheduler.schedule - Generating schedule for 2024-6
+2024-05-14 17:50:46,545 [INFO] scheduler.schedule - Starting the solver
+2024-05-14 17:50:46,619 [INFO] scheduler.schedule - The solution found is optimal or feasible
+2024-05-14 17:50:46,622 [INFO] main - Finishing the main program

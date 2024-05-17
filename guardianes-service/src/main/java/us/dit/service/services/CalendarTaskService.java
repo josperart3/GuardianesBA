@@ -62,7 +62,7 @@ public class CalendarTaskService {
         List<TaskSummary> tasksFilteredByName = taskList.stream()
                 .filter(task -> task.getName().equals(CalendarTaskName)
                         && task.getProcessId().equals(processId)
-                        && task.getStatus().equals("Ready"))
+                        && (task.getStatus().equals("Ready")||task.getStatus().equals("InProgress")))
                 .collect(Collectors.toList());
 
         logger.info("Las tareas filtradas son " + tasksFilteredByName);
@@ -85,12 +85,14 @@ public class CalendarTaskService {
      */
     public void initAndCompleteCalendarTask(String principal, Set<LocalDate> festivos, Long taskId) {
         UserTaskServicesClient userClient = kieUtils.getUserTaskServicesClient();
-        logger.info("Reclamamos la tarea de calendario con id " + taskId);
-        userClient.claimTask(containerId, taskId, principal);
-
-        logger.info("Comenzamos el completado de la tarea de calendario con id " + taskId);
-        userClient.startTask(containerId, taskId, principal);
-
+        if(userClient.findTaskById(taskId).getStatus().equals("Ready"))
+        {
+	        logger.info("Reclamamos la tarea de calendario con id " + taskId);
+	        userClient.claimTask(containerId, taskId, principal);
+	
+	        logger.info("Comenzamos el completado de la tarea de calendario con id " + taskId);
+	        userClient.startTask(containerId, taskId, principal);
+        }
         logger.info("Construimos el calendario");
         Calendar calendarioFestivos = this.buildCalendar(festivos);
 

@@ -27,7 +27,8 @@
 	<properties>
 
 		<version.org.kie>7.74.1.Final</version.org.kie>
-		<!-- https://docs.jboss.org/jbpm/release/7.74.1.Final/jbpm-docs/html_single/-->
+		<!--
+		https://docs.jboss.org/jbpm/release/7.74.1.Final/jbpm-docs/html_single/-->
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -37,6 +38,7 @@
 		<version.io.swagger>1.6.2</version.io.swagger>
 		<version.org.apache.cxf>3.4.5</version.org.apache.cxf>
 		<version.org.webjars.swagger-ui>2.2.10</version.org.webjars.swagger-ui>
+		
 	</properties>
 
 	<dependencies>
@@ -77,6 +79,7 @@
 		</dependency>
 
 		<!-- AÑADIDO POR MI -->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-hateoas</artifactId>
@@ -90,16 +93,24 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
+		<!--
+		https://mvnrepository.com/artifact/org.optaplanner/optaplanner-spring-boot-starter -->
+		<dependency>
+			<groupId>org.optaplanner</groupId>
+			<artifactId>optaplanner-spring-boot-starter</artifactId>
+			<version>9.44.0.Final</version>
+		</dependency>
 		<!--Para depuración-->
 		<dependency>
-  			<groupId>ch.qos.logback</groupId>
- 			 <artifactId>logback-classic</artifactId>
- 		</dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
 		<!-- para usar SSO, la aplicación será un service-provider 
 		Esto está sacado de https://www.baeldung.com/spring-security-saml
 		
 		Y hay más info en:https://spring.io/projects/spring-security-saml#overview
-		Para la versión que se está usando aquí de springboot: https://docs.spring.io/spring-boot/docs/2.6.15/reference/htmlsingle/#web.security.saml2
+		Para la versión que se está usando aquí de springboot:
+		https://docs.spring.io/spring-boot/docs/2.6.15/reference/htmlsingle/#web.security.saml2
 		La configuración del IS de WSO2 como identy-provider está en:
 		https://is.docs.wso2.com/en/latest/guides/login/sso-for-saml/
 		https://is.docs.wso2.com/en/latest/sdks/spring-boot/
@@ -119,7 +130,8 @@
 </dependency>
 
 		-->
-		<!-- creo que esto es para cuando haya replicación, pero no lo tengo todavía claro
+		<!-- creo que esto es para cuando haya replicación, pero no lo tengo
+		todavía claro
    	<dependency>
     		<groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-starter-quartz</artifactId>
@@ -137,8 +149,7 @@
 		</dependency>
 
 
-
-    </dependencies>
+	</dependencies>
 
 	<build>
 		<plugins>
@@ -178,14 +189,14 @@
 					<artifactId>mysql-connector-java</artifactId>
 				</dependency>
 				<!-- añadido por mi la de jpa persistence -->
-					<!--
+				<!--
 				<dependency>
 					<groupId>org.drools</groupId>
 					<artifactId>drools-persistence-jpa</artifactId>
 					<version>${version.org.kie}</version>
 				</dependency>
 				-->
-				
+
 				<dependency>
 					<groupId>com.h2database</groupId>
 					<artifactId>h2</artifactId>

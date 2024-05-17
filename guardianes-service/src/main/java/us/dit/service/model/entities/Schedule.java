@@ -5,6 +5,10 @@ import us.dit.service.model.validation.annotations.ValidSchedule;
 import lombok.Data;
 import org.hibernate.annotations.SortNatural;
 import org.hibernate.validator.constraints.Range;
+import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
+import org.optaplanner.core.api.domain.solution.PlanningScore;
+import org.optaplanner.core.api.domain.solution.PlanningSolution;
+import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -21,20 +25,17 @@ import java.util.SortedSet;
  * @see ScheduleDay
  * @author miggoncan
  */
+@PlanningSolution
 @Data
 @Entity
 @IdClass(CalendarPK.class)
 @ValidSchedule
 public class Schedule {
-	
+
 	public enum ScheduleStatus {
-		NOT_CREATED,
-		BEING_GENERATED,
-		PENDING_CONFIRMATION,
-		CONFIRMED, 
-		GENERATION_ERROR
+		NOT_CREATED, BEING_GENERATED, PENDING_CONFIRMATION, CONFIRMED, GENERATION_ERROR
 	}
-	
+
 	@Id
 	@Column(name = "calendar_month")
 	@Range(min = 1, max = 12)
@@ -45,9 +46,17 @@ public class Schedule {
 	@Range(min = 1970)
 	@NotNull
 	private Integer year;
+
+	@PlanningEntityCollectionProperty
+	@OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL)
+	@SortNatural
+	private SortedSet<ScheduleDay> days;
 	@MapsId
 	@OneToOne
 	private Calendar calendar;
+	
+	@PlanningScore
+	private HardSoftScore score;
 
 	/**
 	 * This represents the status in which this schedule is. For example, the
@@ -57,11 +66,7 @@ public class Schedule {
 	@Enumerated(EnumType.STRING)
 	@NotNull
 	private ScheduleStatus status = ScheduleStatus.NOT_CREATED;
-
-	@OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL)
-	@SortNatural
-	private SortedSet<ScheduleDay> days;
-
+	
 	public Schedule(ScheduleStatus status) {
 		this.status = status;
 	}
@@ -78,7 +83,7 @@ public class Schedule {
 			this.setDays(this.getDays());
 		}
 	}
-	
+
 	public void setDays(SortedSet<ScheduleDay> days) {
 		this.days = days;
 		if (days != null) {

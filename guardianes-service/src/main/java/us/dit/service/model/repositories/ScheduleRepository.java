@@ -15,5 +15,5 @@ import javax.persistence.Entity;
  * @author miggoncan
  */
 public interface ScheduleRepository extends JpaRepository<Schedule, CalendarPK> {
-
+	
 }
