@@ -1,43 +1,73 @@
-/**
- * 
- */
 package us.dit.service.controllers;
 
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Optional;
 
-import javax.servlet.http.HttpSession;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.kie.server.api.model.instance.TaskSummary;
+import org.optaplanner.core.api.solver.SolverManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import us.dit.service.services.TasksService;
+import lombok.extern.slf4j.Slf4j;
+import us.dit.service.controllers.exceptions.CalendarNotFoundException;
+import us.dit.service.model.entities.Calendar;
+import us.dit.service.model.entities.Schedule;
+import us.dit.service.model.entities.primarykeys.CalendarPK;
+import us.dit.service.model.repositories.CalendarRepository;
+import us.dit.service.model.repositories.ScheduleRepository;
 
-/**
- * TODO: El controlador para manejar las planificaciones (Agendas)
- */
-@Controller
-@RequestMapping("/guardianes")
+@RestController
+@RequestMapping("/guardianes/schedule")
+@Slf4j
 public class ScheduleController {
+	@Autowired
+	private ScheduleRepository scheduleRepository;
+	@Autowired
+	private SolverManager<Schedule,Integer> solverManager;
+	@Autowired
+	private CalendarRepository calendarRepository;
 	
-	@GetMapping("/schedules")
-	public String getAll(HttpSession session, Model model) {
-		return "schedule";
+	@GetMapping
+	public List<Schedule> getAllSchedulers() {
+		return scheduleRepository.findAll();
 	}
+	@GetMapping("/{yearMonth}")
+	public Schedule getSchedulerById(@PathVariable YearMonth yearMonth) {
+		CalendarPK pk = new CalendarPK(yearMonth.getMonthValue(), yearMonth.getYear());
+		return scheduleRepository.findById(pk).get();
+	}
+	/**
+	 * Crear una planificación nueva para un mes año
+	 * Estudiar el solverManager para analizar las posibilidades, configuración y lo que hace
+	 * @param id
+	 */
+	@PostMapping("/{yearMonth}")
+	public void solve(@PathVariable YearMonth yearMonth) {
+		log.info("Request received: solve schedule for " + yearMonth);
+		CalendarPK pk = new CalendarPK(yearMonth.getMonthValue(), yearMonth.getYear());
 
-	@GetMapping("/schedules/{scheduleId}")
-	
-	public String getScheduleById(@PathVariable Long taskId,HttpSession session) {
-	return "schedule";
+		Optional<Calendar> calendar = calendarRepository.findById(pk);
+
+		if (!calendar.isPresent()) {
+			log.info("The calendar of the given month was not found. Throwing CalendarNotFoundException. Server cannot do the planning");
+			throw new CalendarNotFoundException(yearMonth.getMonthValue(), yearMonth.getYear());
+		}
+		if(scheduleRepository.findById(pk).isEmpty()) {
+			/**
+			 * Si la planificación no se ha realizado todavía se ejecuta 
+			 * 
+			 **/
+			solverManager.solveAndListen(1,  
+					(problemId)-> scheduleRepository.findById(pk).get(), 
+					scheduleRepository::save);	
+		}
+			
+			
 	}
-		
+	
+
 }
