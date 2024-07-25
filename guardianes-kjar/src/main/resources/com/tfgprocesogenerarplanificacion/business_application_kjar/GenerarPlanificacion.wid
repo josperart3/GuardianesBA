@@ -6,11 +6,10 @@
     "defaultHandler" : "mvel: new us.dit.service.handlers.GenerateScheduleWorkItemHandler()",
     "icon" : "GenerarPlanificacion.png"
     "parameters" : [ 
-        "IdCalendarioFestivos" : new StringDataType(), 
-        "DataBase" : new StringDataType()
+        "Id_calendario_festivos" : new StringDataType()
     ], 
     "results" : [ 
-        "IdPlanificacionProvisional" : new StringDataType()
+        "Id_planficacion_provisional" : new StringDataType()
     ]
   ]
 ]

@@ -1,20 +1,20 @@
 /**
-*  This file is part of GuardianesBA - Business Application for processes managing healthcare tasks planning and supervision.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
-*
-*  GuardianesBA is free software: you can redistribute it and/or
-*  modify it under the terms of the GNU General Public License as published
-*  by the Free Software Foundation, either version 3 of the License, or (at
-*  your option) any later version.
-*
-*  GuardianesBA is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-*  Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License along
-*  with GuardianesBA. If not, see <https://www.gnu.org/licenses/>.
-**/
+ * This file is part of GuardianesBA - Business Application for processes managing healthcare tasks planning and supervision.
+ * Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+ * <p>
+ * GuardianesBA is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or (at
+ * your option) any later version.
+ * <p>
+ * GuardianesBA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along
+ * with GuardianesBA. If not, see <https://www.gnu.org/licenses/>.
+ **/
 package us.dit.service.handlers;
 
 import com.github.caldav4j.exceptions.CalDAV4JException;
@@ -40,6 +40,7 @@ import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
 /**
  * Esta clase es el WIH para atender a la tarea InformarMedicos definida en el proceso
  *
@@ -63,7 +64,7 @@ public class InformDoctorsWorkItemHandler implements WorkItemHandler {
     @Override
     public void executeWorkItem(WorkItem workItem, WorkItemManager workItemManager) {
         logger.info("Entramos en la tarea automatica Informar Medicos");
-        String idPlanificacionValidada = (String) workItem.getParameter("idPlanificacionValida");
+        String idPlanificacionValidada = (String) workItem.getParameter("Id_planificacion_valida");
         logger.info("La planficacion valida es " + idPlanificacionValidada);
         String[] yearMonthString = idPlanificacionValidada.split("-");
         YearMonth yearMonth = YearMonth.of(Integer.parseInt(yearMonthString[1]), Integer.parseInt(yearMonthString[0]));
@@ -81,7 +82,7 @@ public class InformDoctorsWorkItemHandler implements WorkItemHandler {
         }
         Map<String, Object> params = new HashMap<>();
         logger.info("¿Los doctores han sido informados? " + this.doctorsInformed);
-        params.put("procesoFinalizado", this.doctorsInformed);
+        params.put("Proceso_finalizado", this.doctorsInformed);
         logger.info("Se completa el proceso");
         workItemManager.completeWorkItem(workItem.getId(), params);
     }

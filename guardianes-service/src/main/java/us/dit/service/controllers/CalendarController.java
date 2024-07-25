@@ -70,7 +70,7 @@ public class CalendarController {
      *
      * @param session objeto que maneja la sesion HTTP
      */
-    public String obtenerTareaEstablecerFestivos(HttpSession session) {
+    private String obtenerTareaEstablecerFestivos(HttpSession session) {
         logger.info("Iniciando la seleccion de festivos");
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetails principal = (UserDetails) auth.getPrincipal();

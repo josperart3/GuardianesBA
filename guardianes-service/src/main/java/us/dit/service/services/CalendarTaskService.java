@@ -1,20 +1,20 @@
 /**
-*  This file is part of GuardianesBA - Business Application for processes managing healthcare tasks planning and supervision.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
-*
-*  GuardianesBA is free software: you can redistribute it and/or
-*  modify it under the terms of the GNU General Public License as published
-*  by the Free Software Foundation, either version 3 of the License, or (at
-*  your option) any later version.
-*
-*  GuardianesBA is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-*  Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License along
-*  with GuardianesBA. If not, see <https://www.gnu.org/licenses/>.
-**/
+ * This file is part of GuardianesBA - Business Application for processes managing healthcare tasks planning and supervision.
+ * Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+ * <p>
+ * GuardianesBA is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or (at
+ * your option) any later version.
+ * <p>
+ * GuardianesBA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along
+ * with GuardianesBA. If not, see <https://www.gnu.org/licenses/>.
+ **/
 package us.dit.service.services;
 
 import org.apache.logging.log4j.LogManager;
@@ -120,7 +120,7 @@ public class CalendarTaskService {
         logger.info("Construimos el mapa con los parametros de salida");
         Map<String, Object> params = new HashMap<>();
         String idCalendarioFestivos = calendarioFestivos.getMonth() + "-" + calendarioFestivos.getYear();
-        params.put("Id_Calendario_Festivos", idCalendarioFestivos);
+        params.put("Id_calendario_festivos", idCalendarioFestivos);
         logger.info("Se termina la tarea de Establecer festivos");
         userClient.completeTask(containerId, taskId, principal, params);
 
@@ -151,7 +151,7 @@ public class CalendarTaskService {
                     && currDayWeek != DayOfWeek.SUNDAY
                     && !festivos.contains(currDate);
             dayConf.setIsWorkingDay(isWorkingDay);
-            
+
             dayConf.setNumShifts(defaultMinShiftsPerDay);
             dayConf.setNumConsultations(defaultMinConsultationsPerDay);
             dayConf.setCalendar(calendar);

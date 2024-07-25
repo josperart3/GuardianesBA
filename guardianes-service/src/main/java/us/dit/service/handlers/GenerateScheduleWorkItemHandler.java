@@ -1,20 +1,20 @@
 /**
-*  This file is part of GuardianesBA - Business Application for processes managing healthcare tasks planning and supervision.
-*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
-*
-*  GuardianesBA is free software: you can redistribute it and/or
-*  modify it under the terms of the GNU General Public License as published
-*  by the Free Software Foundation, either version 3 of the License, or (at
-*  your option) any later version.
-*
-*  GuardianesBA is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-*  Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License along
-*  with GuardianesBA. If not, see <https://www.gnu.org/licenses/>.
-**/
+ * This file is part of GuardianesBA - Business Application for processes managing healthcare tasks planning and supervision.
+ * Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+ * <p>
+ * GuardianesBA is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or (at
+ * your option) any later version.
+ * <p>
+ * GuardianesBA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along
+ * with GuardianesBA. If not, see <https://www.gnu.org/licenses/>.
+ **/
 package us.dit.service.handlers;
 
 import org.apache.logging.log4j.LogManager;
@@ -56,7 +56,7 @@ public class GenerateScheduleWorkItemHandler implements WorkItemHandler {
 
     @Override
     public void executeWorkItem(WorkItem workItem, WorkItemManager workItemManager) {
-        String idCalendarioFestivos = (String) workItem.getParameter("IdCalendarioFestivos");
+        String idCalendarioFestivos = (String) workItem.getParameter("Id_calendario_festivos");
 
         logger.info("Ejecutando WorkItemHandler para el trabajo: " + workItem.getName());
 
@@ -96,7 +96,7 @@ public class GenerateScheduleWorkItemHandler implements WorkItemHandler {
         String idPlanificacionProvisional = scheduleMonth + "-" + scheduleYear;
         logger.info("El id de la planificacion es " + idPlanificacionProvisional);
         Map<String, Object> results = new HashMap<>();
-        results.put("IdPlanificacionProvisional", idPlanificacionProvisional);
+        results.put("Id_planficacion_provisional", idPlanificacionProvisional);
         logger.info("Se termina la tarea de Generar Planificacion");
         workItemManager.completeWorkItem(workItem.getId(), results);
 
