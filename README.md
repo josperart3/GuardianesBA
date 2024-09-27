@@ -27,12 +27,12 @@ This project is licensed under the terms of the [GNU General Public License (GPL
 Este proyecto es el resultado del trabajo desarrollado por los alumnos que a continuación se mencionan, bajo la supervisión de la profesora Isabel Román Martínez.
 
 **Autores:**
-- Jose Carlos Rodríguez Morón: TFG, versión actual del proyecto incluyendo el paradigma BPM para el proceso principal de generación de la planificación. Este repositorio recoge el trabajo realizado durante el desarrollo de esta tercera versión
-- Carmen Cohen Calvo: TFG Servicio de calendario para un servicio hospitalario, segunda versión del proyecto, que incluye la gestión de calendarios de los profesionales sanitarios
-- Miguel Ángel González-Alorda Cantero: TFG Servicio para la gestión de actividades asistenciales complementarias, primera versión del proyecto que no consideraba el paradigma BPM
+- [Jose Carlos Rodríguez Morón](https://github.com/josrodmor11): TFG, versión actual del proyecto incluyendo el paradigma BPM para el proceso principal de generación de la planificación. Este repositorio recoge el trabajo realizado durante el desarrollo de esta tercera versión
+- [Carmen Cohen Calvo](https://github.com/carcohcal): TFG Servicio de calendario para un servicio hospitalario, segunda versión del proyecto, que incluye la gestión de calendarios de los profesionales sanitarios
+- [Miguel Ángel González-Alorda Cantero](https://github.com/miggoncan): TFG Servicio para la gestión de actividades asistenciales complementarias, primera versión del proyecto que no consideraba el paradigma BPM
 
 **Supervisora:**
-- Isabel Román Martínez, Profesora del Departamento de Ingeniería Telemática de la Universidad de Sevilla
+- [Isabel Román Martínez](https://github.com/Isabel-Roman), Profesora del Departamento de Ingeniería Telemática de la Universidad de Sevilla
 
 La supervisión incluye la generación de ideas, la corrección, el desarrollo de algunos componentes y la orientación técnica durante todo el proceso de desarrollo.
 
