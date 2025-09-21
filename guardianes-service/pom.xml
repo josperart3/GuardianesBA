@@ -37,7 +37,6 @@
 		<version.io.swagger>1.6.2</version.io.swagger>
 		<version.org.apache.cxf>3.4.5</version.org.apache.cxf>
 		<version.org.webjars.swagger-ui>2.2.10</version.org.webjars.swagger-ui>
-		<version.org.optaplanner>7.74.1.Final</version.org.optaplanner>
 	</properties>
 
 	<dependencies>
@@ -164,16 +163,14 @@
 		<dependency>
   			<groupId>org.optaplanner</groupId>
   			<artifactId>optaplanner-core</artifactId>
-  			<version>7.74.0.Final</version>
+  			<version>8.7.0.Final</version>
 		</dependency>
 		
 		<dependency>
   			<groupId>org.optaplanner</groupId>
   			<artifactId>optaplanner-persistence-jpa</artifactId>
-  			<version>7.74.0.Final</version>
+  			<version>8.7.0.Final</version>
 		</dependency>
-
-
 
     </dependencies>
 
