@@ -18,10 +18,20 @@
 package us.dit.service.model.entities;
 
 import lombok.Data;
+
 import org.hibernate.annotations.SortNatural;
 import org.hibernate.validator.constraints.Range;
 import us.dit.service.model.entities.primarykeys.CalendarPK;
 import us.dit.service.model.validation.annotations.ValidSchedule;
+
+import org.optaplanner.core.api.domain.solution.PlanningSolution;
+import org.optaplanner.core.api.domain.solution.drools.ProblemFactProperty;
+import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
+import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
+import org.optaplanner.core.api.domain.solution.ProblemFactCollectionProperty;
+import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
+import org.optaplanner.persistence.jpa.api.score.buildin.hardsoft.HardSoftScoreConverter;
+import org.optaplanner.core.api.score.constraint.ConstraintConfigurationProvider;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -38,68 +48,112 @@ import java.util.SortedSet;
  * @author miggoncan
  * @see ScheduleDay
  */
+
 @Data
 @Entity
 @IdClass(CalendarPK.class)
-@ValidSchedule
+@PlanningSolution
+@Table(name = "schedule")
 public class Schedule {
 
+    // ==== Identidad / Clave compuesta ====
     @Id
-    @Column(name = "calendar_month")
-    @Range(min = 1, max = 12)
-    @NotNull
+    @Column(name = "calendar_month", nullable = false)
+    @Min(1) @Max(12) @NotNull
     private Integer month;
+
     @Id
-    @Column(name = "calendar_year")
-    @Range(min = 1970)
-    @NotNull
+    @Column(name = "calendar_year", nullable = false)
+    @Min(1970) @NotNull
     private Integer year;
+
     @MapsId
-    @OneToOne
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumns({
+        @JoinColumn(name = "calendar_month", referencedColumnName = "month", insertable = false, updatable = false),
+        @JoinColumn(name = "calendar_year",  referencedColumnName = "year",  insertable = false, updatable = false)
+    })
     private Calendar calendar;
-    /**
-     * This represents the status in which this schedule is. For example, the
-     * schedule of this {@link Calendar} could not have been created yet. Or it
-     * could be waiting for approval
-     */
+
     @Enumerated(EnumType.STRING)
     @NotNull
+    @Column(name = "status", nullable = false)
     private ScheduleStatus status = ScheduleStatus.NOT_CREATED;
-    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL)
+
+    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
     @SortNatural
     private SortedSet<ScheduleDay> days;
 
-    public Schedule(ScheduleStatus status) {
-        this.status = status;
-    }
+    // ==== ENTIDADES PLANIFICABLES ====
+    @PlanningEntityCollectionProperty
+    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ShiftAssignment> shiftAssignments = new ArrayList<>();
 
-    public Schedule() {
-    }
+    // ==== FACTS / RANGOS ====
 
-    public void setCalendar(Calendar calendar) {
-        this.calendar = calendar;
-        if (calendar != null) {
-            this.month = calendar.getMonth();
-            this.year = calendar.getYear();
-            // If not updated yet, this will update the references in days
-            this.setDays(this.getDays());
+    @ProblemFactCollectionProperty
+    @ValueRangeProvider(id = "doctorRange")
+    @ManyToMany
+    @JoinTable(
+        name = "schedule_doctors",
+        joinColumns = {
+            @JoinColumn(name = "sched_calendar_month", referencedColumnName = "calendar_month"),
+            @JoinColumn(name = "sched_calendar_year",  referencedColumnName = "calendar_year")
+        },
+        inverseJoinColumns = {
+            @JoinColumn(name = "doctor_id", referencedColumnName = "id")
         }
-    }
+    )
+    private List<Doctor> doctorList = new ArrayList<>();
 
-    public void setDays(SortedSet<ScheduleDay> days) {
-        this.days = days;
-        if (days != null) {
-            for (ScheduleDay scheduleDay : days) {
-                scheduleDay.setSchedule(this);
-            }
+    @ProblemFactCollectionProperty
+    @ManyToMany
+    @JoinTable(
+        name = "schedule_shifts",
+        joinColumns = {
+            @JoinColumn(name = "sched_calendar_month", referencedColumnName = "calendar_month"),
+            @JoinColumn(name = "sched_calendar_year",  referencedColumnName = "calendar_year")
+        },
+        inverseJoinColumns = {
+            @JoinColumn(name = "shift_id", referencedColumnName = "id")
         }
-    }
+    )
+    private List<Shift> shiftList = new ArrayList<>();
+
+    @ProblemFactCollectionProperty
+    @ManyToMany
+    @JoinTable(
+        name = "schedule_day_cfg",
+        joinColumns = {
+            @JoinColumn(name = "sched_calendar_month", referencedColumnName = "calendar_month"),
+            @JoinColumn(name = "sched_calendar_year",  referencedColumnName = "calendar_year")
+        },
+        inverseJoinColumns = {
+            @JoinColumn(name = "dc_day",            referencedColumnName = "day"),
+            @JoinColumn(name = "dc_calendar_month", referencedColumnName = "calendar_month"),
+            @JoinColumn(name = "dc_calendar_year",  referencedColumnName = "calendar_year")
+        }
+    )
+    private List<DayConfiguration> dayConfigurationList = new ArrayList<>();
+
+    // ==== CONFIGURACIÓN DE RESTRICCIONES (NUEVO EN LA SOLUCIÓN) ====
+    @ConstraintConfigurationProvider
+    @ProblemFactProperty
+    private us.dit.service.model.entities.score.GuardianesConstraintConfiguration constraintConfiguration
+            = new us.dit.service.model.entities.score.GuardianesConstraintConfiguration(0L);
+
+    // ==== SCORE ====
+    @PlanningScore
+    @Convert(converter = HardSoftScoreConverter.class)
+    @Column(name = "score")
+    private HardSoftScore score;
+
+    public Schedule() {}
+    public Schedule(ScheduleStatus status) { this.status = status; }
+
+    // … setters de consistencia: setCalendar, setDays, internalSetShiftAssignments, setShiftAssignments(Deprecated) …
 
     public enum ScheduleStatus {
-        NOT_CREATED,
-        BEING_GENERATED,
-        PENDING_CONFIRMATION,
-        CONFIRMED,
-        GENERATION_ERROR
+        NOT_CREATED, BEING_GENERATED, PENDING_CONFIRMATION, CONFIRMED, GENERATION_ERROR
     }
 }
