@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<solver>
+    <environmentMode>REPRODUCIBLE</environmentMode>
+    <moveThreadCount>AUTO</moveThreadCount>
+
+    <solutionClass>us.dit.service.model.entities.Schedule</solutionClass>
+    <entityClass>us.dit.service.model.entities.ShiftAssignment</entityClass>
+
+    <scoreDirectorFactory>
+        <scoreDrl>us/dit/service/model/entities/score/guardianesScoreRules.drl</scoreDrl>
+    </scoreDirectorFactory>
+
+    <termination>
+        <secondsSpentLimit>100</secondsSpentLimit>
+    </termination>
+</solver>
