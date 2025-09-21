@@ -24,17 +24,25 @@ import org.hibernate.validator.constraints.Range;
 import us.dit.service.model.entities.primarykeys.CalendarPK;
 import us.dit.service.model.validation.annotations.ValidSchedule;
 
-import org.optaplanner.core.api.domain.solution.PlanningSolution;
-import org.optaplanner.core.api.domain.solution.drools.ProblemFactProperty;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
+import org.optaplanner.core.api.domain.solution.PlanningSolution;
+import org.optaplanner.core.api.domain.solution.ProblemFactProperty;
+
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
+import org.optaplanner.core.api.domain.solution.PlanningScore;
 import org.optaplanner.core.api.domain.solution.ProblemFactCollectionProperty;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
+
 import org.optaplanner.persistence.jpa.api.score.buildin.hardsoft.HardSoftScoreConverter;
-import org.optaplanner.core.api.score.constraint.ConstraintConfigurationProvider;
+import org.optaplanner.core.api.domain.constraintweight.ConstraintConfigurationProvider;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedSet;
 
 /**

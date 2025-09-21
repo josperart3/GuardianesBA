@@ -1,8 +1,9 @@
 package us.dit.service.model.entities;
 
 import javax.persistence.*;
+
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
-import org.optaplanner.core.api.domain.pin.PlanningPin;
+import org.optaplanner.core.api.domain.entity.PlanningPin;
 import org.optaplanner.core.api.domain.variable.PlanningVariable;
 
 @PlanningEntity
@@ -54,5 +55,11 @@ public class ShiftAssignment {
         return id != null && id.equals(that.id);
     }
     @Override public int hashCode() { return 31; }
-    @Override public String toString() { /* igual que el tuyo */ return ...; }
+    @Override public String toString() {
+    	return "ShiftAssignment{" +
+                "id=" + id +
+                ", shift=" + (shift != null ? shift.getId() : null) +
+                ", doctor=" + (doctor != null ? (doctor.getFirstName() + " " + doctor.getLastNames()) : "null") +
+                '}';
+    }
 }
