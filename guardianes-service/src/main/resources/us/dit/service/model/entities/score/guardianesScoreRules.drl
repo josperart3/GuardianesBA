@@ -1,0 +1,250 @@
+package us.dit.service.model.entities.score
+
+import java.lang.Math
+import java.time.temporal.ChronoUnit
+
+import us.dit.service.model.entities.domain.Doctor
+import us.dit.service.model.entities.domain.ShiftAssignment
+import us.dit.service.model.entities.domain.DayConfiguration
+import us.dit.service.model.entities.domain.AllowedShift
+
+import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore
+
+global org.optaplanner.core.impl.score.buildin.hardsoft.HardSoftScoreHolder scoreHolder
+
+dialect "mvel"
+
+// ---------------- REGLAS ----------------
+
+rule "Maximun number of shifts in the afternoon for a doctor"
+when
+    $config : GuardianesConstraintConfiguration()
+    $doctor : Doctor()
+    Number(intValue > $config.maxShifts.hardScore)
+        from accumulate(
+            ShiftAssignment(doctor == $doctor, shift.shiftType == "TARDE"),
+            count()
+        )
+then
+    scoreHolder.penalize(kcontext, $config.getMaxShifts().getHardScore());
+end
+
+rule "Minimun number of shifts in the afternoon for a doctor"
+when
+    $config : GuardianesConstraintConfiguration()
+    $doctor : Doctor()
+    Number(intValue < $config.minShifts.hardScore)
+        from accumulate(
+            ShiftAssignment(doctor == $doctor, shift.shiftType == "TARDE"),
+            count()
+        )
+then
+    scoreHolder.penalize(kcontext, $config.getMinShifts().getHardScore());
+end
+
+// ciclo
+rule "A doctor does night guards"
+when
+    $config : GuardianesConstraintConfiguration()
+    ShiftAssignment(
+        doctor != null,
+        shift.shiftType == "GUARDIA",
+        doctor.shiftConfiguration.doesCycleShifts == false
+    )
+then
+    scoreHolder.penalize(kcontext, $config.getDoesCycleShifts().getHardScore());
+end
+
+rule "A doctor does afternoon shifts when they do night guards"
+when
+    $config : GuardianesConstraintConfiguration()
+    ShiftAssignment(
+        $d  : doctor != null,
+        $dc : dayConfiguration != null,
+        shift.shiftType == "TARDE",
+        $d.shiftConfiguration.hasShiftsOnlyWhenCycleShifts == true
+    )
+    not( Doctor( id == $d.id ) from $dc.mandatoryShifts )
+then
+    scoreHolder.penalize(kcontext, $config.getHasShiftsOnlyWhenCycleShifts().getHardScore());
+end
+
+// preferencias/indisponibilidades
+rule "Unavailable afternoon shifts for a doctor during a week"
+when
+    $config : GuardianesConstraintConfiguration()
+    ShiftAssignment( $d : doctor != null, $s : shift != null )
+    AllowedShift( id == $s.id ) from $d.shiftConfiguration.unavailableShifts
+then
+    scoreHolder.penalize(kcontext, $config.getUnavailableShifts().getHardScore());
+end
+
+rule "Mandatory afternoon shifts for a doctor during a week"
+when
+    $config : GuardianesConstraintConfiguration()
+    ShiftAssignment( $d : doctor != null, $s : shift != null )
+    AllowedShift( id == $s.id ) from $d.shiftConfiguration.mandatoryShifts
+then
+    scoreHolder.reward(kcontext, $config.getMandatoryShifts().getSoftScore());
+end
+
+// condiciones del día
+rule "Working day"
+when
+    $config : GuardianesConstraintConfiguration()
+    ShiftAssignment(dayConfiguration.isWorkingDay == false)
+then
+    scoreHolder.penalize(kcontext, $config.getIsWorkingDay().getHardScore());
+end
+
+rule "Number of afternoon shifts that should be in a day of the week"
+when
+    $config : GuardianesConstraintConfiguration()
+    $day : DayConfiguration($expected : numShifts != null, $expectedCount : numShifts)
+    Number(intValue != $expectedCount) from accumulate(
+        ShiftAssignment(shift.shiftType == "TARDE", dayConfiguration == $day),
+        count()
+    )
+then
+    scoreHolder.penalize(kcontext, $config.getNumShifts().getHardScore());
+end
+
+rule "Number of consultations in a day of the week"
+when
+    $config : GuardianesConstraintConfiguration()
+    $d : DayConfiguration($numConsultations : numConsultations != null)
+    $c : Number() from accumulate(
+        ShiftAssignment(consultation == true, dayConfiguration == $d),
+        count()
+    )
+    eval($numConsultations != $c.intValue())
+then
+    scoreHolder.penalize(kcontext, $config.getNumConsultationsInDay().getHardScore());
+end
+
+// otras restricciones
+rule "Holidays for a doctor"
+when
+    $config : GuardianesConstraintConfiguration()
+    ShiftAssignment(
+        $doc  : doctor != null,
+        $date : dayConfiguration.date
+    )
+    eval( $doc.getAbsence() != null && $doc.getAbsence().isAbsentOn($date) )
+then
+    scoreHolder.penalize(kcontext, $config.getHolidays().getHardScore());
+end
+
+rule "Minimum number of days between night guards fot a doctor"
+when
+    $config : GuardianesConstraintConfiguration()
+    $a : ShiftAssignment(
+        $doctor : doctor != null,
+        shift.shiftType == "GUARDIA",
+        $dateA : dayConfiguration.date
+    )
+    ShiftAssignment(
+        doctor == $doctor,
+        shift.shiftType == "GUARDIA",
+        $dateB : dayConfiguration.date,
+        this != $a,
+        eval(Math.abs(ChronoUnit.DAYS.between($dateA, $dateB)) < 3)
+    )
+then
+    scoreHolder.penalize(kcontext, $config.getMinDaysBetweenCycleShifts().getHardScore());
+end
+
+rule "Skill required for a doctor to work in this station"
+when
+    $config : GuardianesConstraintConfiguration()
+    ShiftAssignment(
+        shift.requiresSkill == true,
+        (doctor == null || !doctor.hasRequiredSkill())
+    )
+then
+    scoreHolder.penalize(kcontext, $config.getSkillRequired().getHardScore());
+end
+
+rule "Number of consultations a doctor do"
+when
+    $config : GuardianesConstraintConfiguration()
+    $doctor : Doctor($conf : shiftConfiguration != null, $expected : shiftConfiguration.numConsultations)
+    Number(intValue != $expected) from accumulate(
+        ShiftAssignment(consultation == true, doctor == $doctor),
+        count()
+    )
+then
+    scoreHolder.penalize(kcontext, $config.getNum_consultations().getSoftScore());
+end
+
+rule "Unwanted afternoon shifts for a doctor during a week"
+when
+    $config : GuardianesConstraintConfiguration()
+    ShiftAssignment( $d : doctor != null, $s : shift != null )
+    AllowedShift( id == $s.id ) from $d.shiftConfiguration.unwantedShifts
+then
+    scoreHolder.penalize(kcontext, $config.getUnwantedShifts().getHardScore());
+end
+
+rule "Wanted afternoon shifts for a doctor during a week"
+when
+    $config : GuardianesConstraintConfiguration()
+    ShiftAssignment( $d : doctor != null, $s : shift != null )
+    AllowedShift( id == $s.id ) from $d.shiftConfiguration.wantedShifts
+then
+    scoreHolder.reward(kcontext, $config.getWantedShifts().getSoftScore());
+end
+
+rule "Wanted consultations for a doctor during a week"
+when
+    $config : GuardianesConstraintConfiguration()
+    ShiftAssignment(
+        consultation == true,
+        $d : doctor != null,
+        $s : shift != null
+    )
+    AllowedShift( id == $s.id ) from $d.shiftConfiguration.wantedConsultations
+then
+    scoreHolder.reward(kcontext, $config.getWantedConsultations().getSoftScore());
+end
+
+// balanceo y unicidad
+rule "Balancear carga por doctor (cuadrático)"
+when
+  $d : Doctor()
+  $count : Number() from accumulate(
+             ShiftAssignment(doctor == $d),
+             count()
+           )
+then
+  int c = ((Number)$count).intValue();
+  scoreHolder.addSoftConstraintMatch(kcontext, -(c * c));
+end
+
+rule "Evitar varias asignaciones por día para un mismo doctor"
+when
+  $d : Doctor()
+  $day : DayConfiguration()
+  Number(intValue > 1) from accumulate(
+     ShiftAssignment(doctor == $d, dayConfiguration == $day),
+     count()
+  )
+then
+  scoreHolder.addSoftConstraintMatch(kcontext, -1);
+end
+
+// DURA: cada turno debe tener médico asignado
+rule "Every shift must have a doctor"
+when
+    ShiftAssignment( doctor == null )
+then
+    scoreHolder.addHardConstraintMatch(kcontext, -1);
+end
+
+// BLANDA: preferir asignado vs null
+rule "Prefer assigned doctor"
+when
+    ShiftAssignment( doctor != null )
+then
+    scoreHolder.addSoftConstraintMatch(kcontext, +1);
+end
