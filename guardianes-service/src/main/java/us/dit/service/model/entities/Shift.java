@@ -4,9 +4,6 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 
 
-/**
- * Turno/día concreto. Entidad JPA usada como Problem Fact en Schedule.
- */
 @Entity
 @Table(name = "shift",
        indexes = {
@@ -15,7 +12,7 @@ import javax.validation.constraints.NotBlank;
        })
 public class Shift extends AbstractPersistable {
 
-    /** Día al que pertenece el turno (PK compuesta en DayConfiguration). */
+
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumns({
         @JoinColumn(name = "dayconfiguration_day",            referencedColumnName = "day",            nullable = false),
@@ -24,16 +21,13 @@ public class Shift extends AbstractPersistable {
     })
     private DayConfiguration dayConfiguration;
 
-    /** Tipo de turno: p.ej. "TARDE", "GUARDIA"… (lo usan las reglas DRL). */
     @NotBlank
     @Column(name = "shift_type", nullable = false, length = 32)
     private String shiftType;
 
-    /** Si el puesto requiere una skill concreta (lo usan las reglas DRL). */
     @Column(name = "requires_skill", nullable = false)
     private boolean requiresSkill;
 
-    /** Si este turno es una consulta (lo usan las reglas DRL). */
     @Column(name = "is_consultation", nullable = false)
     private boolean isConsultation;
 
@@ -46,7 +40,6 @@ public class Shift extends AbstractPersistable {
         this.shiftType = shiftType;
     }
 
-    // --- Getters/Setters ---
 
     public DayConfiguration getDayConfiguration() {
         return dayConfiguration;
@@ -62,7 +55,6 @@ public class Shift extends AbstractPersistable {
         this.shiftType = shiftType;
     }
 
-    // Importante: mantener el nombre "isConsultation()" para que en DRL puedas usar "consultation"
     public boolean isConsultation() {
         return isConsultation;
     }
@@ -70,7 +62,6 @@ public class Shift extends AbstractPersistable {
         isConsultation = consultation;
     }
 
-    // En tu DRL usas shift.requiresSkill, así que este getter debe llamarse "getRequiresSkill()"
     public boolean getRequiresSkill() {
         return requiresSkill;
     }
@@ -78,7 +69,7 @@ public class Shift extends AbstractPersistable {
         this.requiresSkill = requiresSkill;
     }
 
-    // --- equals/hashCode por id (patrón JPA seguro) ---
+
 
     @Override
     public boolean equals(Object o) {
