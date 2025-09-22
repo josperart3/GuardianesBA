@@ -2,10 +2,12 @@ package us.dit.service.model.entities;
 
 import javax.persistence.*;
 
+import lombok.*;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
 import org.optaplanner.core.api.domain.entity.PlanningPin;
 import org.optaplanner.core.api.domain.variable.PlanningVariable;
 
+@Getter @Setter
 @PlanningEntity
 @Entity
 @Table(name = "shift_assignment")
@@ -38,7 +40,6 @@ public class ShiftAssignment {
     public ShiftAssignment() { }
     public ShiftAssignment(Shift shift) { this.shift = shift; }
 
-    // getters/setters …
 
     public boolean isConsultation() { return shift != null && shift.isConsultation(); }
     public boolean requiresSkill() { return shift != null && shift.getRequiresSkill(); }
@@ -46,8 +47,15 @@ public class ShiftAssignment {
     public DayConfiguration getDayConfiguration() {
         return shift != null ? shift.getDayConfiguration() : null;
     }
+    
+    
+    public void setSchedule(Schedule schedule) {
+        this.schedule = schedule;
+    }
+    public Schedule getSchedule() {
+        return schedule;
+    }
 
-    // equals/hashCode por id
     @Override public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ShiftAssignment)) return false;
