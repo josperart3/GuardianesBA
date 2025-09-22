@@ -64,7 +64,7 @@ import java.util.SortedSet;
 @Table(name = "schedule")
 public class Schedule {
 
-    // ==== Identidad / Clave compuesta ====
+
     @Id
     @Column(name = "calendar_month", nullable = false)
     @Min(1) @Max(12) @NotNull
@@ -92,12 +92,11 @@ public class Schedule {
     @SortNatural
     private SortedSet<ScheduleDay> days;
 
-    // ==== ENTIDADES PLANIFICABLES ====
     @PlanningEntityCollectionProperty
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ShiftAssignment> shiftAssignments = new ArrayList<>();
 
-    // ==== FACTS / RANGOS ====
+
 
     @ProblemFactCollectionProperty
     @ValueRangeProvider(id = "doctorRange")
@@ -144,13 +143,12 @@ public class Schedule {
     )
     private List<DayConfiguration> dayConfigurationList = new ArrayList<>();
 
-    // ==== CONFIGURACIÓN DE RESTRICCIONES (NUEVO EN LA SOLUCIÓN) ====
     @ConstraintConfigurationProvider
     @ProblemFactProperty
     private us.dit.service.model.entities.score.GuardianesConstraintConfiguration constraintConfiguration
             = new us.dit.service.model.entities.score.GuardianesConstraintConfiguration(0L);
 
-    // ==== SCORE ====
+
     @PlanningScore
     @Convert(converter = HardSoftScoreConverter.class)
     @Column(name = "score")
@@ -159,7 +157,6 @@ public class Schedule {
     public Schedule() {}
     public Schedule(ScheduleStatus status) { this.status = status; }
 
-    // … setters de consistencia: setCalendar, setDays, internalSetShiftAssignments, setShiftAssignments(Deprecated) …
 
     public enum ScheduleStatus {
         NOT_CREATED, BEING_GENERATED, PENDING_CONFIRMATION, CONFIRMED, GENERATION_ERROR
