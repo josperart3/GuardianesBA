@@ -55,7 +55,7 @@ public class SchedulerService {
     private final ScheduleRepository scheduleRepository;
     private final ShiftRepository shiftRepository;
     private final DoctorRepository doctorRepository;
-    private final DayConfigurationRepository dayConfigurationRepository; // si no lo tienes, usa calendar.getDayConfigurations()
+    private final DayConfigurationRepository dayConfigurationRepository; 
 
     private final SolverManager<Schedule, CalendarPK> solverManager;
 
@@ -94,7 +94,7 @@ public class SchedulerService {
 	        Schedule bestSolution = job.getFinalBestSolution(); // bloquea hasta la mejor solución
 	
 	        // 4) Persistir la mejor solución
-	        bestSolution.setStatus(ScheduleStatus.PENDING_CONFIRMATION); // o el estado que prefieras post-solve
+	        bestSolution.setStatus(ScheduleStatus.PENDING_CONFIRMATION); 
 	        // Importante para JPA: asegurar que las asociaciones bidireccionales están bien
 	        if (bestSolution.getShiftAssignments() != null) {
 	            bestSolution.getShiftAssignments().forEach(a -> a.setSchedule(bestSolution));
@@ -138,7 +138,7 @@ public class SchedulerService {
         // 2.2 DayConfiguration (hechos)
         List<DayConfiguration> dayConfigs = dayConfigurationRepository
                 .findByCalendarMonthAndCalendarYear(month, year);
-        // Si no tienes repo, puedes usar: new ArrayList<>(schedule.getCalendar().getDayConfigurations())
+
         schedule.setDayConfigurationList(dayConfigs);
 
         // 2.3 Shifts (hechos)
@@ -162,25 +162,21 @@ public class SchedulerService {
         for (Shift shift : shifts) {
             ShiftAssignment saExisting = currentByShiftId.get(shift.getId());
             if (saExisting != null) {
-                // Asegura la referencia back a este schedule (por si se cargó desasociado)
                 saExisting.setSchedule(schedule);
                 assignments.add(saExisting);
             } else {
                 ShiftAssignment sa = new ShiftAssignment(shift);
                 sa.setSchedule(schedule);
-                sa.setPinned(false); // por defecto, planificable
-                // doctor nulo => OptaPlanner decidirá
+                sa.setPinned(false);
                 assignments.add(sa);
             }
         }
         schedule.setShiftAssignments(assignments);
     }
 
-    /** Lógica para decidir si un doctor puede formar parte del rango (ajusta a tu modelo). */
+
     private boolean isAssignableDoctor(Doctor d) {
-        // Si tienes un enum DoctorStatus similar al antiguo:
         // return d.getStatus() != DoctorStatus.DELETED;
-        // Si no, simplemente devuelve true:
         return true;
     }
 }
