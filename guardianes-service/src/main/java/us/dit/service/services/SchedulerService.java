@@ -128,7 +128,7 @@ public class SchedulerService {
         final Integer year  = schedule.getYear();
 
         // 2.1 Doctores (rango de valores @ValueRangeProvider("doctorRange"))
-        // Filtra doctores eliminados/inactivos si aplica en tu modelo
+        // Filtra doctores eliminados/inactivos
         List<Doctor> allDoctors = doctorRepository.findAll();
         List<Doctor> doctorRange = allDoctors.stream()
                 .filter(this::isAssignableDoctor)
