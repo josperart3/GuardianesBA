@@ -27,9 +27,11 @@ import us.dit.service.model.validation.annotations.ValidSchedule;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
 import org.optaplanner.core.api.domain.solution.PlanningSolution;
 import org.optaplanner.core.api.domain.solution.ProblemFactProperty;
+import org.optaplanner.core.api.domain.lookup.LookUpStrategyType;
 
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
 import org.optaplanner.core.api.domain.solution.PlanningScore;
+import org.optaplanner.core.api.domain.lookup.PlanningId;
 import org.optaplanner.core.api.domain.solution.ProblemFactCollectionProperty;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 
@@ -56,12 +58,11 @@ import java.util.SortedSet;
  * @author miggoncan
  * @see ScheduleDay
  */
-
 @Data
 @Entity
-@IdClass(CalendarPK.class)
-@PlanningSolution
 @Table(name = "schedule")
+@IdClass(CalendarPK.class) // <<--- usamos IdClass, NO EmbeddedId
+@PlanningSolution(lookUpStrategyType = LookUpStrategyType.PLANNING_ID_OR_NONE)
 public class Schedule {
 
 
@@ -75,8 +76,7 @@ public class Schedule {
     @Min(1970) @NotNull
     private Integer year;
 
-    @MapsId
-    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumns({
         @JoinColumn(name = "calendar_month", referencedColumnName = "month", insertable = false, updatable = false),
         @JoinColumn(name = "calendar_year",  referencedColumnName = "year",  insertable = false, updatable = false)
@@ -92,12 +92,12 @@ public class Schedule {
     @SortNatural
     private SortedSet<ScheduleDay> days;
 
+    // ---- Entidades planificables ----
     @PlanningEntityCollectionProperty
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ShiftAssignment> shiftAssignments = new ArrayList<>();
 
-
-
+    // ---- Hechos / rangos ----
     @ProblemFactCollectionProperty
     @ValueRangeProvider(id = "doctorRange")
     @ManyToMany
@@ -107,9 +107,7 @@ public class Schedule {
             @JoinColumn(name = "sched_calendar_month", referencedColumnName = "calendar_month"),
             @JoinColumn(name = "sched_calendar_year",  referencedColumnName = "calendar_year")
         },
-        inverseJoinColumns = {
-            @JoinColumn(name = "doctor_id", referencedColumnName = "id")
-        }
+        inverseJoinColumns = @JoinColumn(name = "doctor_id", referencedColumnName = "id")
     )
     private List<Doctor> doctorList = new ArrayList<>();
 
@@ -121,9 +119,7 @@ public class Schedule {
             @JoinColumn(name = "sched_calendar_month", referencedColumnName = "calendar_month"),
             @JoinColumn(name = "sched_calendar_year",  referencedColumnName = "calendar_year")
         },
-        inverseJoinColumns = {
-            @JoinColumn(name = "shift_id", referencedColumnName = "id")
-        }
+        inverseJoinColumns = @JoinColumn(name = "shift_id", referencedColumnName = "id")
     )
     private List<Shift> shiftList = new ArrayList<>();
 
@@ -143,11 +139,11 @@ public class Schedule {
     )
     private List<DayConfiguration> dayConfigurationList = new ArrayList<>();
 
+    // ---- Constraint configuration ---- 
     @ConstraintConfigurationProvider
-    @ProblemFactProperty
+    @Transient
     private us.dit.service.model.entities.score.GuardianesConstraintConfiguration constraintConfiguration
             = new us.dit.service.model.entities.score.GuardianesConstraintConfiguration(0L);
-
 
     @PlanningScore
     @Convert(converter = HardSoftScoreConverter.class)
@@ -157,7 +153,14 @@ public class Schedule {
     public Schedule() {}
     public Schedule(ScheduleStatus status) { this.status = status; }
 
-
+    
+    public void setId(CalendarPK pk) {
+        if (pk != null) {
+            this.month = pk.getMonth();
+            this.year = pk.getYear();
+        }
+    }
+    
     public enum ScheduleStatus {
         NOT_CREATED, BEING_GENERATED, PENDING_CONFIRMATION, CONFIRMED, GENERATION_ERROR
     }

@@ -18,6 +18,8 @@
 package us.dit.service.model.entities;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -40,36 +42,48 @@ import java.util.Set;
  * @author miggoncan
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 @Entity
 public class Doctor {
 
     @Id
-    @GeneratedValue(
-            strategy = GenerationType.IDENTITY
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
+    @ToString.Include
     @Column(name = "id")
     private Long id;
+    
     @Column(name = "TelegramID")
     private String telegramId;
+    
     @Column(nullable = false)
     @NotBlank
     private String firstName;
+    
     @Column(nullable = false)
     @NotBlank
     private String lastNames;
+    
     @Email
     @NotBlank
     @Column(unique = true, nullable = false)
     private String email;
+    
     @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false)
     private DoctorStatus status = DoctorStatus.AVAILABLE;
+    
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToOne(optional = true, mappedBy = "doctor", cascade = {CascadeType.ALL})
     private Absence absence;
-    // Start date will be the date this doctor's reference date to calculate their
-    // shift cycle
+    
     @Column(nullable = false)
     private LocalDate startDate;
+    
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "doctor_roles",
@@ -88,8 +102,7 @@ public class Doctor {
     public Doctor() {
     }
 
-    // The toString method from @Data is not used as it can create an infinite loop
-    // between Absence#toString and this method
+
     @Override
     public String toString() {
         return Doctor.class.getSimpleName()
@@ -131,6 +144,22 @@ public class Doctor {
         }
         return null;
 
+    }
+    
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToOne(mappedBy = "doctor", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
+    private ShiftConfiguration shiftConfiguration;
+    
+    public void setShiftConfiguration(ShiftConfiguration sc) {
+        this.shiftConfiguration = sc;
+        if (sc != null && sc.getDoctor() != this) {
+            sc.setDoctor(this);
+        }
+    }
+    
+    public boolean hasRequiredSkill() {
+        return true;
     }
 
     public enum DoctorStatus {

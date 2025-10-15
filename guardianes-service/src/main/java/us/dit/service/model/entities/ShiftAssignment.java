@@ -6,6 +6,7 @@ import lombok.*;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
 import org.optaplanner.core.api.domain.entity.PlanningPin;
 import org.optaplanner.core.api.domain.variable.PlanningVariable;
+import org.optaplanner.core.api.domain.lookup.PlanningId;
 
 @Getter @Setter
 @PlanningEntity
@@ -13,6 +14,7 @@ import org.optaplanner.core.api.domain.variable.PlanningVariable;
 @Table(name = "shift_assignment")
 public class ShiftAssignment {
 
+	@PlanningId
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

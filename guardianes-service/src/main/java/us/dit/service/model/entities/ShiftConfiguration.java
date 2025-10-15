@@ -20,10 +20,14 @@ package us.dit.service.model.entities;
 import us.dit.service.model.validation.annotations.ValidShiftConfiguration;
 import us.dit.service.model.validation.annotations.ValidShiftPreferences;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
+
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -43,13 +47,21 @@ import java.util.Set;
  * @author miggoncan
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 @Entity
 @ValidShiftConfiguration
 @ValidShiftPreferences
 public class ShiftConfiguration {
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
+    @ToString.Include
 	@NotNull
 	private Long doctorId;
+	
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
 	@MapsId
 	@OneToOne
 	private Doctor doctor;
@@ -109,28 +121,28 @@ public class ShiftConfiguration {
 	 * rather not have assigned
 	 */
 	@ManyToMany
-	private Set<AllowedShift> unwantedShifts;
+	private Set<AllowedShift> unwantedShifts = new HashSet<>();;
 
 	/**
 	 * unavailableShifts indicates the shifts the associated {@link Doctor} cannot
 	 * have, under any circumstances
 	 */
 	@ManyToMany
-	private Set<AllowedShift> unavailableShifts;
+	private Set<AllowedShift> unavailableShifts = new HashSet<>();;
 
 	/**
 	 * wantedShifts indicates the shifts the associated {@link Doctor} would like to
 	 * have
 	 */
 	@ManyToMany
-	private Set<AllowedShift> wantedShifts;
+	private Set<AllowedShift> wantedShifts = new HashSet<>();;
 
 	/**
 	 * mandatoryShifts indicates the shifts the associated {@link Doctor} HAS to
 	 * have
 	 */
 	@ManyToMany
-	private Set<AllowedShift> mandatoryShifts;
+	private Set<AllowedShift> mandatoryShifts = new HashSet<>();;
 	
 	@ManyToMany
 	private Set<AllowedShift> wantedConsultations;

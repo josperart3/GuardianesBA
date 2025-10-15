@@ -29,6 +29,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 import java.util.Set;
+import java.time.LocalDate;
 
 /**
  * This {@link Entity} represents a specific conditions to take into account
@@ -171,6 +172,21 @@ public class DayConfiguration extends AbstractDay {
 				cycleChange.setDayConfiguration(this);
 			}
 		}
+	}
+	
+	@Transient
+	public LocalDate getDate() {
+	    if (year == null || month == null || day == null) {
+	        return null;
+	    }
+	    return LocalDate.of(year, month, day);
+	}
+
+	public void setDate(LocalDate date) {
+	    if (date == null) return;
+	    this.day = date.getDayOfMonth();
+	    this.month = date.getMonthValue();
+	    this.year = date.getYear();
 	}
 
 	// the toString method of the @Data annotation is not used as it can cause an infinite loop between the Calendar#toString method and this method
