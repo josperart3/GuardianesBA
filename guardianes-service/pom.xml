@@ -39,12 +39,61 @@
 		<version.org.webjars.swagger-ui>2.2.10</version.org.webjars.swagger-ui>
 	</properties>
 
-	<dependencies>
+	<dependencyManagement>
+	  <dependencies>
+	    <!-- BOM de Testcontainers (Java 8 OK) -->
+	    <dependency>
+	      <groupId>org.testcontainers</groupId>
+	      <artifactId>testcontainers-bom</artifactId>
+	      <version>1.19.7</version>
+	      <type>pom</type>
+	      <scope>import</scope>
+	    </dependency>
+	    
+	    <dependency>
+	      <groupId>org.kie</groupId>
+	      <artifactId>kie-bom</artifactId>
+	      <version>${version.org.kie}</version> <!-- 7.74.1.Final -->
+	      <type>pom</type>
+	      <scope>import</scope>
+    	</dependency>
+	  </dependencies>
+	</dependencyManagement>
 
+	<dependencies>
+		
 		<dependency>
 			<groupId>org.kie</groupId>
 			<artifactId>kie-server-spring-boot-starter</artifactId>
 			<version>${version.org.kie}</version>
+			 <exclusions>
+			    <!-- Evitar mezclar versiones antiguas -->
+			    <exclusion>
+			      <groupId>org.drools</groupId>
+			      <artifactId>drools-canonical-model</artifactId>
+			    </exclusion>
+			    <exclusion>
+			      <groupId>org.drools</groupId>
+			      <artifactId>drools-core-dynamic</artifactId>
+			    </exclusion>
+			    <exclusion>
+			      <groupId>org.drools</groupId>
+			      <artifactId>drools-alphanetwork-compiler</artifactId>
+			    </exclusion>
+			    <exclusion>
+			      <groupId>org.drools</groupId>
+			      <artifactId>drools-mvel</artifactId>
+			    </exclusion>
+			
+			    <!-- (opcional pero recomendable) evita que arrastre sus propias bases drools/kie -->
+			    <exclusion><groupId>org.drools</groupId><artifactId>drools-core</artifactId></exclusion>
+			    <exclusion><groupId>org.drools</groupId><artifactId>drools-compiler</artifactId></exclusion>
+			    <exclusion><groupId>org.drools</groupId><artifactId>drools-model</artifactId></exclusion>
+			    <exclusion><groupId>org.drools</groupId><artifactId>drools-model-compiler</artifactId></exclusion>
+			    <exclusion><groupId>org.kie</groupId><artifactId>kie-api</artifactId></exclusion>
+			    <exclusion><groupId>org.kie</groupId><artifactId>kie-internal</artifactId></exclusion>
+			    
+  			</exclusions>
 		</dependency>
 
 		<!-- Swagger -->
@@ -96,6 +145,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
+		
+
+
+		
 		<!--Para depuración-->
 		<dependency>
   			<groupId>ch.qos.logback</groupId>
@@ -171,7 +224,121 @@
   			<artifactId>optaplanner-persistence-jpa</artifactId>
   			<version>8.7.0.Final</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+		</dependency>
 
+		<dependency>
+		    <groupId>org.junit.jupiter</groupId>
+		    <artifactId>junit-jupiter-api</artifactId>
+		    <version>5.9.3</version>
+		    <scope>test</scope>
+	  	</dependency>
+		  
+	  	<dependency>
+		    <groupId>org.junit.jupiter</groupId>
+		    <artifactId>junit-jupiter-engine</artifactId>
+		    <version>5.9.3</version>
+		    <scope>test</scope>
+	  	</dependency>
+
+	
+		<dependency>
+		    <groupId>org.testcontainers</groupId>
+		    <artifactId>testcontainers</artifactId>
+		    <scope>test</scope>
+	  	</dependency>
+		  
+	  	<dependency>
+		    <groupId>org.testcontainers</groupId>
+		    <artifactId>junit-jupiter</artifactId>
+		    <scope>test</scope>
+	  	</dependency>
+	  	
+	  	<dependency>
+		    <groupId>org.testcontainers</groupId>
+		    <artifactId>postgresql</artifactId>
+		    <scope>test</scope>
+	  	</dependency>
+	  	
+	  	<dependency>
+		  	<groupId>org.drools</groupId>
+		  	<artifactId>drools-core</artifactId>
+		  	<version>7.74.1.Final</version>
+		</dependency>
+		
+		<dependency>
+		  	<groupId>org.drools</groupId>
+		  	<artifactId>drools-compiler</artifactId>
+		  	<version>7.74.1.Final</version>
+		  	<exclusions>
+		    <!-- Evita el error de accessExternalDTD -->
+		    	<exclusion>
+		      		<groupId>xerces</groupId>
+		      		<artifactId>xercesImpl</artifactId>
+		    	</exclusion>
+		    	<exclusion>
+		      		<groupId>xml-apis</groupId>
+		      		<artifactId>xml-apis</artifactId>
+		    	</exclusion>
+		  </exclusions>
+		</dependency>
+		
+		<dependency>
+			  <groupId>org.drools</groupId>
+			  <artifactId>drools-mvel</artifactId>
+			  <version>${version.org.kie}</version>
+		</dependency>
+
+		<dependency>
+		  	<groupId>org.drools</groupId>
+		  	<artifactId>drools-model-compiler</artifactId>
+		  	<version>7.74.1.Final</version>
+		  	<exclusions>
+		    <!-- Evita el error de XML external DTD -->
+			    <exclusion>
+				      <groupId>xerces</groupId>
+				      <artifactId>xercesImpl</artifactId>
+			    </exclusion>
+			    <exclusion>
+				      <groupId>xml-apis</groupId>
+				      <artifactId>xml-apis</artifactId>
+			    </exclusion>
+		  	</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-canonical-model</artifactId>
+			<version>${version.org.kie}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-core-dynamic</artifactId>
+			<version>${version.org.kie}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-alphanetwork-compiler</artifactId>
+			<version>${version.org.kie}</version>
+		</dependency>
+		
+		<dependency>
+			  <groupId>org.kie</groupId>
+			  <artifactId>kie-api</artifactId>
+			  <version>${version.org.kie}</version>
+		</dependency>
+		
+		<dependency>
+			  <groupId>org.kie</groupId>
+			  <artifactId>kie-internal</artifactId>
+			  <version>${version.org.kie}</version>
+		</dependency>
+		
     </dependencies>
 
 	<build>
