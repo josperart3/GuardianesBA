@@ -73,6 +73,11 @@ public class Absence {
 
     public Absence() {
     }
+    
+    public boolean isAbsentOn(LocalDate date) {
+        if (date == null || startDate == null || endDate == null) return false;
+        return !date.isBefore(startDate) && !date.isAfter(endDate);
+    }
 
     public void setDoctor(Doctor doctor) {
         this.doctor = doctor;
