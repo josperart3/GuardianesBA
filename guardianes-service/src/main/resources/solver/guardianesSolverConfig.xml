@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <solver>
     <environmentMode>REPRODUCIBLE</environmentMode>
-    <moveThreadCount>AUTO</moveThreadCount>
+    <moveThreadCount>NONE</moveThreadCount>
 
     <solutionClass>us.dit.service.model.entities.Schedule</solutionClass>
     <entityClass>us.dit.service.model.entities.ShiftAssignment</entityClass>
