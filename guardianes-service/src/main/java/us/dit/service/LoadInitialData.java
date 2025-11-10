@@ -20,8 +20,10 @@ package us.dit.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import us.dit.service.model.entities.Calendar;
 import us.dit.service.model.entities.*;
@@ -37,6 +39,7 @@ import java.util.*;
  */
 @Configuration
 @Slf4j
+@ConditionalOnProperty(name = "app.initdata.enable", havingValue = "true", matchIfMissing = false)
 public class LoadInitialData {
     @Autowired
     private DoctorRepository doctorRepository;
@@ -105,7 +108,7 @@ public class LoadInitialData {
                 log.info("Preloading " + allowedShiftFriday);
 
                 // To preload a calendar, use:
-                // preloadCalendarFor(YearMonth.of(2020, 6));
+                preloadCalendarFor(YearMonth.of(2025, 8));
                 executeSqlStatements();
                 log.info("The preload of the initial data finished");
             } else {

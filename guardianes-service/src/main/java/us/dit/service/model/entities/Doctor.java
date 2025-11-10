@@ -145,6 +145,10 @@ public class Doctor {
         return null;
 
     }
+
+    public ShiftConfiguration getShiftConfiguration() {
+        return shiftConfiguration;
+    }
     
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

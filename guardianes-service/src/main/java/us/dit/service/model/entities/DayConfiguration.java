@@ -59,9 +59,6 @@ import java.time.LocalDate;
  * @author miggoncan
  */
 @Data
-//This annotations are used instead of @Data as the default hashcode() method 
-// would case an infinite loop between calendar.hashcode() and 
-// dayConfiguration.hashcode()
 @EqualsAndHashCode(exclude = "calendar", callSuper = false)
 @Entity
 @IdClass(DayMonthYearPK.class)
