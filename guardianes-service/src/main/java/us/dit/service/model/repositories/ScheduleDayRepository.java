@@ -20,6 +20,7 @@ package us.dit.service.model.repositories;
 import us.dit.service.model.entities.ScheduleDay;
 import us.dit.service.model.entities.primarykeys.DayMonthYearPK;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import javax.persistence.Entity;
 
@@ -31,6 +32,7 @@ import javax.persistence.Entity;
  * 
  * @author miggoncan
  */
+@Repository
 public interface ScheduleDayRepository extends JpaRepository<ScheduleDay, DayMonthYearPK> {
 
 }

@@ -6,10 +6,10 @@ import javax.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "shift",
-       indexes = {
-         @Index(name = "idx_shift_day_cfg", columnList = "dayconfiguration_day,dayconfiguration_calendar_month,dayconfiguration_calendar_year"),
-         @Index(name = "idx_shift_day_type", columnList = "dayconfiguration_day,shift_type")
-       })
+    indexes = {
+        @Index(name = "idx_shift_day_cfg", columnList = "dayconfiguration_day,dayconfiguration_calendar_month,dayconfiguration_calendar_year"),
+        @Index(name = "idx_shift_day_type", columnList = "dayconfiguration_day,shift_type")
+    })
 public class Shift extends AbstractPersistable {
 
 

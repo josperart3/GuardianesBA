@@ -18,6 +18,8 @@
 package us.dit.service.model.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
 import us.dit.service.model.entities.Rol;
 
 import javax.persistence.Entity;
@@ -31,7 +33,7 @@ import java.util.Optional;
  *
  * @author carcohcal
  */
-
+@Repository
 public interface RolRepository extends JpaRepository<Rol, Long> {
 
     public Optional<Rol> findBynombreRol(String rol);

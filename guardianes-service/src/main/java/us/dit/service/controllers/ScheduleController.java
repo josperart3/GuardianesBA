@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.context.annotation.Lazy;
 import us.dit.service.model.ScheduleView;
 import us.dit.service.model.entities.Schedule;
 import us.dit.service.services.SchedulerTaskService;
@@ -47,6 +48,7 @@ import java.util.stream.Collectors;
  * @version 1.0
  * @date Julio 2024
  */
+@Lazy
 @Controller
 @RequestMapping("/guardianes")
 public class ScheduleController {

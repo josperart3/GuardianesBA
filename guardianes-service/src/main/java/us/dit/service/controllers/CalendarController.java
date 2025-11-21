@@ -28,6 +28,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.*;
 import us.dit.service.services.CalendarTaskService;
 import us.dit.service.services.JsonParserFestivos;
@@ -46,6 +47,7 @@ import java.util.stream.Collectors;
  * @date Julio 2024
  */
 @Controller
+@Lazy
 @RequestMapping("/guardianes")
 public class CalendarController {
 

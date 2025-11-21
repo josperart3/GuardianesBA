@@ -13,15 +13,19 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test; // Importar @Test de JUnit 5
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource; // Para activar LoadInitialData
-
-import us.dit.service.services.OptaplannerGuardians; // Importar el servicio
 import us.dit.service.model.entities.Schedule;
 import us.dit.service.model.entities.ShiftAssignment;
 
 
 @SpringBootTest
-@TestPropertySource(properties = { "app.initdata.enable=true" })
+@TestPropertySource(properties = { 
+    "app.initdata.enable=true",
+    "spring.jpa.hibernate.ddl-auto=create-drop"  // Crea el schema limpio para el test
+})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class OptaplannerGuardiansTest {
 
     

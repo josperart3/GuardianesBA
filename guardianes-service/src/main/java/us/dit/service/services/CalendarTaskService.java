@@ -23,6 +23,7 @@ import org.kie.server.api.model.instance.TaskSummary;
 import org.kie.server.client.UserTaskServicesClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import us.dit.service.model.entities.Calendar;
 import us.dit.service.model.entities.DayConfiguration;
@@ -43,6 +44,7 @@ import java.util.stream.Collectors;
  * @version 1.0
  * @date Julio 2024
  */
+@Lazy
 @Service
 public class CalendarTaskService {
 

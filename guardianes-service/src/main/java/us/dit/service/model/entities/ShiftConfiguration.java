@@ -54,7 +54,6 @@ import java.util.Set;
 @ValidShiftPreferences
 public class ShiftConfiguration {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     @ToString.Include
 	@NotNull

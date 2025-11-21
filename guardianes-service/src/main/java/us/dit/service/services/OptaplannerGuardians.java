@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Lazy;
+
 import org.springframework.transaction.annotation.Transactional;
 
 import us.dit.service.model.entities.*;
@@ -26,6 +28,7 @@ import us.dit.service.model.repositories.DoctorRepository;
 /**
  * 
  */
+@Lazy
 @Service
 public class OptaplannerGuardians {
 
@@ -60,8 +63,6 @@ public class OptaplannerGuardians {
 
         
         SolverFactory<Schedule> factory = SolverFactory.createFromXmlResource("solver/guardianesSolverConfig.xml");
-
-        
         Solver<Schedule> solver = factory.buildSolver();
 
         

@@ -32,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import us.dit.service.model.entities.Doctor;
 import us.dit.service.model.repositories.DoctorRepository;
-
+import org.springframework.context.annotation.Lazy;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import java.io.IOException;
@@ -47,6 +47,7 @@ import java.util.Optional;
  * @date 12 feb. 2022
  */
 @Slf4j
+@Lazy
 @Service
 public class CalendariosIndividuales {
     @Autowired

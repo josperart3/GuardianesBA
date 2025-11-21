@@ -19,6 +19,8 @@ package us.dit.service.model.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
 import us.dit.service.model.entities.Doctor;
 
 import javax.persistence.Entity;
@@ -34,6 +36,7 @@ import java.util.Optional;
  *
  * @author miggoncan
  */
+@Repository
 public interface DoctorRepository extends JpaRepository<Doctor, Long> {
 
     /**

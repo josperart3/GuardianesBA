@@ -151,9 +151,9 @@
 		
 		<!--Para depuración-->
 		<dependency>
-  			<groupId>ch.qos.logback</groupId>
- 			 <artifactId>logback-classic</artifactId>
- 		</dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
 		<!-- para usar SSO, la aplicación será un service-provider 
 		Esto está sacado de https://www.baeldung.com/spring-security-saml
 		
@@ -214,15 +214,15 @@
 
 	<!-- DEPENDENCIAS OPTAPLANNER -->
 		<dependency>
-  			<groupId>org.optaplanner</groupId>
-  			<artifactId>optaplanner-core</artifactId>
-  			<version>8.7.0.Final</version>
+			<groupId>org.optaplanner</groupId>
+			<artifactId>optaplanner-core</artifactId>
+			<version>7.48.0.Final</version>
 		</dependency>
 		
 		<dependency>
-  			<groupId>org.optaplanner</groupId>
-  			<artifactId>optaplanner-persistence-jpa</artifactId>
-  			<version>8.7.0.Final</version>
+			<groupId>org.optaplanner</groupId>
+			<artifactId>optaplanner-persistence-jpa</artifactId>
+			<version>7.48.0.Final</version>
 		</dependency>
 		
 		<dependency>
@@ -230,7 +230,7 @@
 			<artifactId>postgresql</artifactId>
 		</dependency>
 
-		<dependency>
+		<!-- <dependency>
 		    <groupId>org.junit.jupiter</groupId>
 		    <artifactId>junit-jupiter-api</artifactId>
 		    <version>5.9.3</version>
@@ -242,7 +242,7 @@
 		    <artifactId>junit-jupiter-engine</artifactId>
 		    <version>5.9.3</version>
 		    <scope>test</scope>
-	  	</dependency>
+	  	</dependency> -->
 
 	
 		<dependency>
@@ -338,6 +338,15 @@
 			  <artifactId>kie-internal</artifactId>
 			  <version>${version.org.kie}</version>
 		</dependency>
+		
+		<dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+        </dependency>
 		
     </dependencies>
 

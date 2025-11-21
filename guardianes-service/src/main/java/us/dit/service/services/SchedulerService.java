@@ -23,6 +23,7 @@ import org.optaplanner.core.api.solver.SolverManager;
 import org.optaplanner.core.api.solver.SolverJob;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.annotation.Lazy;
 import us.dit.service.model.entities.Calendar;
 import us.dit.service.model.entities.DayConfiguration;
 import us.dit.service.model.entities.Doctor;
@@ -46,7 +47,7 @@ import java.util.stream.Collectors;
  *
  * @author miggoncan
  */
-
+@Lazy
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -99,7 +100,7 @@ public class SchedulerService {
 	        if (bestSolution.getShiftAssignments() != null) {
 	            bestSolution.getShiftAssignments().forEach(a -> a.setSchedule(bestSolution));
 	        }
-	        scheduleRepository.save(bestSolution);
+	        scheduleRepository.saveAndFlush(bestSolution);
 	
 	        log.info("Planificación {}/{} generada y persistida con score={}", month, year, bestSolution.getScore());
        
@@ -107,7 +108,7 @@ public class SchedulerService {
         	Thread.currentThread().interrupt();
             log.error("Solver interrumpido para {}/{}", month, year, e);
             workingSchedule.setStatus(ScheduleStatus.GENERATION_ERROR);
-            scheduleRepository.save(workingSchedule);
+            scheduleRepository.saveAndFlush(workingSchedule);
         
         } catch(ExecutionException e) {
         	log.error("Error durante la resolución del solver para {}/{}", month, year, e);

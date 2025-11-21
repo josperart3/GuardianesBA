@@ -35,6 +35,7 @@ import net.fortuna.ical4j.validate.ValidationException;
 import org.apache.http.client.ClientProtocolException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import us.dit.service.model.entities.Doctor;
 import us.dit.service.model.entities.Schedule;
@@ -59,6 +60,7 @@ import java.util.function.Predicate;
  * @date 12 feb. 2022
  */
 @SuppressWarnings("deprecation")
+@Lazy
 @Service
 @Slf4j
 public class calendarioGeneral {

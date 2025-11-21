@@ -20,6 +20,7 @@ package us.dit.service.model.repositories;
 import us.dit.service.model.entities.DayConfiguration;
 import us.dit.service.model.entities.primarykeys.DayMonthYearPK;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -33,6 +34,7 @@ import javax.persistence.Entity;
  * 
  * @author miggoncan
  */
+@Repository
 public interface DayConfigurationRepository extends JpaRepository<DayConfiguration, DayMonthYearPK> {
 
 	List<DayConfiguration> findByCalendarMonthAndCalendarYear(Integer month, Integer year);

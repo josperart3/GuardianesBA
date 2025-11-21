@@ -26,6 +26,7 @@ import org.kie.api.runtime.process.WorkItem;
 import org.kie.api.runtime.process.WorkItemHandler;
 import org.kie.api.runtime.process.WorkItemManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import us.dit.service.calDavService.calendarioGeneral;
 import us.dit.service.model.entities.Schedule;
@@ -48,6 +49,7 @@ import java.util.Optional;
  * @version 1.0
  * @date Julio 2024
  */
+@Lazy
 @Component("InformarMedicos")
 public class InformDoctorsWorkItemHandler implements WorkItemHandler {
 

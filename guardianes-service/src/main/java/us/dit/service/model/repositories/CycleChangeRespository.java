@@ -19,9 +19,12 @@ package us.dit.service.model.repositories;
 
 import us.dit.service.model.entities.CycleChange;
 import us.dit.service.model.entities.primarykeys.DayMonthYearPK;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import javax.persistence.Entity;
+
+import org.springframework.stereotype.Repository;
 
 /**
  * This interface will be used by Jpa to auto-generate a class having all the
@@ -31,6 +34,7 @@ import javax.persistence.Entity;
  * 
  * @author miggoncan
  */
+@Repository
 public interface CycleChangeRespository extends JpaRepository<CycleChange, DayMonthYearPK> {
 
 }
