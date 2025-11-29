@@ -52,6 +52,8 @@ public class GenerateScheduleWorkItemHandler implements WorkItemHandler {
     @Autowired
     private SchedulerService schedulerService;
     @Autowired
+    private OptaplannerGuardians optaplanner;
+    @Autowired
     private ScheduleRepository scheduleRepository;
     @Autowired
     private CalendarRepository calendarRepository;
@@ -70,6 +72,8 @@ public class GenerateScheduleWorkItemHandler implements WorkItemHandler {
         YearMonth yearMonth = YearMonth.of(year, month);
 
         logger.info("Request received to generate schedule for: " + yearMonth);
+
+     /**Toda la gestión del calendario se hace ahora en el servicio optaplannerguardians 
         //Y ademas como construimos en la tarea establecer festivos el calendario
         //podemos recuperarlo y poder usar su scheduler de forma sencilla
         CalendarPK pk = new CalendarPK(yearMonth.getMonthValue(), yearMonth.getYear());
@@ -88,8 +92,10 @@ public class GenerateScheduleWorkItemHandler implements WorkItemHandler {
         Schedule schedule = new Schedule(ScheduleStatus.BEING_GENERATED);
         schedule.setCalendar(calendar.get());
         this.scheduleRepository.save(schedule);
+        */
+        planner.solveProblem(yearMonth);
 
-        this.schedulerService.startScheduleGeneration(calendar.get());
+        //this.schedulerService.startScheduleGeneration(calendar.get());
 
         // Recuperamos el schedule para guardar su id en el proceso que sera el mes y año de ese calendario
         int scheduleMonth = this.scheduleRepository.findById(pk).get().getMonth();

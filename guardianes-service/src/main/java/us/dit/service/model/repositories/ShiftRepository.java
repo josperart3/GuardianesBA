@@ -1,5 +1,5 @@
 package us.dit.service.model.repositories;
-
+import javax.persistence.Entity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

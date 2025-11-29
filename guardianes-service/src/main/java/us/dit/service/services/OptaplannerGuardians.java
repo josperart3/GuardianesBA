@@ -69,8 +69,9 @@ public class OptaplannerGuardians {
         System.out.println("Resolviendo... (esto puede tardar)");
         Schedule best = solver.solve(schedule);
         System.out.println("¡Resolución completada! Resultado final: " + best.getScore());
-
-        
+        best.setStatus(ScheduleStatus.GENERATED);
+        //Guardo la planificación optima
+        this.scheduleRepository.save(best);
         return best;
     }
 
@@ -192,6 +193,8 @@ public class OptaplannerGuardians {
         sch.setDoctorList(doctorsForPlanning); 
         sch.setShiftList(shifts);
         sch.setDayConfigurationList(new ArrayList<>(cal.getDayConfigurations()));
+        //Se guarda el schedule en estado BEING_GENERATED
+        this.scheduleRepository.save(sch);
 
         return sch;
     }
