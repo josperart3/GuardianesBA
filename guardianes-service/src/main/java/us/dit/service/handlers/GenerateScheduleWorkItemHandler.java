@@ -31,7 +31,7 @@ import us.dit.service.model.entities.Schedule.ScheduleStatus;
 import us.dit.service.model.entities.primarykeys.CalendarPK;
 import us.dit.service.model.repositories.CalendarRepository;
 import us.dit.service.model.repositories.ScheduleRepository;
-import us.dit.service.services.SchedulerService;
+import us.dit.service.services.OptaplannerGuardians;
 
 import java.time.YearMonth;
 import java.util.HashMap;
@@ -39,20 +39,25 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Esta clase es el WIH para atender a la tarea GenerarPlanificacion definida en el proceso
+ * Esta clase es el WIH para atender a la tarea GenerarPlanificacion definida en
+ * el proceso.
+ * En noviembre 2025 se ha modificado para que use el servicio
+ * OptaplannerGuardians
  *
- * @author Jose Carlos Rodríguez Morón
- * @version 1.0
- * @date Julio 2024
+ * @author Jose Carlos Rodríguez Morón, Isabel Román Martínez
+ * @version 1.1
+ * @date Noviembre 2025
  */
 @Lazy
 @Component("GenerarPlanificacion")
 public class GenerateScheduleWorkItemHandler implements WorkItemHandler {
     private static final Logger logger = LogManager.getLogger();
+    /*
+     * @Autowired
+     * private SchedulerService schedulerService;
+     */
     @Autowired
-    private SchedulerService schedulerService;
-    @Autowired
-    private OptaplannerGuardians optaplanner;
+    private OptaplannerGuardians planner;
     @Autowired
     private ScheduleRepository scheduleRepository;
     @Autowired
@@ -68,39 +73,52 @@ public class GenerateScheduleWorkItemHandler implements WorkItemHandler {
         int month = Integer.parseInt(parts[0]);
         int year = Integer.parseInt(parts[1]);
 
-        //Asi el yearMonth construido es del mes siguiente y es el obtenido de la tarea Establecer festivos
+        // Asi el yearMonth construido es del mes siguiente y es el obtenido de la tarea
+        // Establecer festivos
         YearMonth yearMonth = YearMonth.of(year, month);
 
         logger.info("Request received to generate schedule for: " + yearMonth);
 
-     /**Toda la gestión del calendario se hace ahora en el servicio optaplannerguardians 
-        //Y ademas como construimos en la tarea establecer festivos el calendario
-        //podemos recuperarlo y poder usar su scheduler de forma sencilla
-        CalendarPK pk = new CalendarPK(yearMonth.getMonthValue(), yearMonth.getYear());
+        /**
+         * Toda la gestión del calendario se hace ahora en el servicio
+         * optaplannerguardians
+         * //Y ademas como construimos en la tarea establecer festivos el calendario
+         * //podemos recuperarlo y poder usar su scheduler de forma sencilla
+         * CalendarPK pk = new CalendarPK(yearMonth.getMonthValue(),
+         * yearMonth.getYear());
+         * 
+         * logger.info("El CalendarPK generado es " + pk);
+         * 
+         * Optional<Calendar> calendar = this.calendarRepository.findById(pk);
+         * if (!calendar.isPresent()) {
+         * throw new RuntimeException("Trying to generate a schedule for a non existing
+         * calendar");
+         * }
+         * 
+         * if (this.scheduleRepository.findById(pk).isPresent()) {
+         * throw new RuntimeException("The schedule is already generated");
+         * }
+         * logger.info("Persisting a schedule with status " +
+         * ScheduleStatus.BEING_GENERATED);
+         * Schedule schedule = new Schedule(ScheduleStatus.BEING_GENERATED);
+         * schedule.setCalendar(calendar.get());
+         * this.scheduleRepository.save(schedule);
+         */
+        Schedule solution = planner.solveProblem(yearMonth);
 
-        logger.info("El CalendarPK generado es " + pk);
+        // this.schedulerService.startScheduleGeneration(calendar.get());
 
-        Optional<Calendar> calendar = this.calendarRepository.findById(pk);
-        if (!calendar.isPresent()) {
-            throw new RuntimeException("Trying to generate a schedule for a non existing calendar");
-        }
+        // Antes recuperábamos el schedule para guardar su id en el proceso que sera el
+        // mes y año de ese calendario
+        // ahora como solveProblem devuelve el schedule optimo ya generado lo usamos
+        // directamente
 
-        if (this.scheduleRepository.findById(pk).isPresent()) {
-            throw new RuntimeException("The schedule is already generated");
-        }
-        logger.info("Persisting a schedule with status " + ScheduleStatus.BEING_GENERATED);
-        Schedule schedule = new Schedule(ScheduleStatus.BEING_GENERATED);
-        schedule.setCalendar(calendar.get());
-        this.scheduleRepository.save(schedule);
-        */
-        planner.solveProblem(yearMonth);
-
-        //this.schedulerService.startScheduleGeneration(calendar.get());
-
-        // Recuperamos el schedule para guardar su id en el proceso que sera el mes y año de ese calendario
-        int scheduleMonth = this.scheduleRepository.findById(pk).get().getMonth();
-        int scheduleYear = this.scheduleRepository.findById(pk).get().getYear();
-        // Para posteriormente en la tarea Validar planificacion podamos obtener el schedule
+        // int scheduleMonth = this.scheduleRepository.findById(pk).get().getMonth();
+        int scheduleMonth = solution.getMonth();
+        int scheduleYear = solution.getYear();
+        // int scheduleYear = this.scheduleRepository.findById(pk).get().getYear();
+        // Para posteriormente en la tarea Validar planificacion podamos obtener el
+        // schedule
         String idPlanificacionProvisional = scheduleMonth + "-" + scheduleYear;
         logger.info("El id de la planificacion es " + idPlanificacionProvisional);
         Map<String, Object> results = new HashMap<>();

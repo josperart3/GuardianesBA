@@ -8,27 +8,12 @@
         <type>java.lang.String</type>
       </config-item>
       <config-item>
-        <name>org.kie.server.bypass.auth.user</name>
-        <value>true</value>
-        <type>java.lang.String</type>
-      </config-item>
-      <config-item>
-        <name>org.kie.server.controller</name>
-        <value></value>
+        <name>org.kie.server.sb.cfg.cxf.path</name>
+        <value>/rest</value>
         <type>java.lang.String</type>
       </config-item>
       <config-item>
         <name>org.kie.server.user</name>
-        <value>guardianes</value>
-        <type>java.lang.String</type>
-      </config-item>
-      <config-item>
-        <name>org.kie.server.timeout</name>
-        <value>48000</value>
-        <type>java.lang.String</type>
-      </config-item>
-      <config-item>
-        <name>org.kie.server.pwd</name>
         <value>guardianes</value>
         <type>java.lang.String</type>
       </config-item>
@@ -38,8 +23,23 @@
         <type>java.lang.String</type>
       </config-item>
       <config-item>
-        <name>org.kie.server.sb.cfg.cxf.path</name>
-        <value>/rest</value>
+        <name>org.kie.server.controller</name>
+        <value></value>
+        <type>java.lang.String</type>
+      </config-item>
+      <config-item>
+        <name>org.kie.server.bypass.auth.user</name>
+        <value>true</value>
+        <type>java.lang.String</type>
+      </config-item>
+      <config-item>
+        <name>org.kie.server.pwd</name>
+        <value>guardianes</value>
+        <type>java.lang.String</type>
+      </config-item>
+      <config-item>
+        <name>org.kie.server.timeout</name>
+        <value>48000</value>
         <type>java.lang.String</type>
       </config-item>
     </configItems>
