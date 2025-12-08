@@ -41,7 +41,7 @@ when
     eval($c.intValue() < $config.getMinShift())
 then
     int missing = $config.getMinShift() - $c.intValue();
-    scoreHolder.addHardConstraintMatch(kcontext, - missing * $config.getMinShifts().getHardScore());
+    scoreHolder.addSoftConstraintMatch(kcontext, - missing * $config.getMinShifts().getSoftScore());
 end
 
 // ciclo

@@ -30,7 +30,7 @@ public class GuardianesConstraintConfiguration extends AbstractPersistable {
     public static final String ASSIGNED_DOCTOR = "Prefer assigned doctor";
 
 
-    public int maxShift = 5;
+    public int maxShift = 30;
     public int minShift = 3;
 
     // HARD constraints
@@ -38,7 +38,7 @@ public class GuardianesConstraintConfiguration extends AbstractPersistable {
     private HardSoftScore maxShifts = HardSoftScore.ofHard(10);
 
     @ConstraintWeight(MIN_SHIFTS)
-    private HardSoftScore minShifts = HardSoftScore.ofHard(10);
+    private HardSoftScore minShifts = HardSoftScore.ofSoft(1);
 
     @ConstraintWeight(DOES_CYCLE_SHIFTS)
     private HardSoftScore doesCycleShifts = HardSoftScore.ofHard(100);
@@ -74,7 +74,7 @@ public class GuardianesConstraintConfiguration extends AbstractPersistable {
     private HardSoftScore onePerDay = HardSoftScore.ofHard(10);
 
     @ConstraintWeight(EVERY_SHIFT_ASSIGNED)
-    private HardSoftScore everyShiftAssigned = HardSoftScore.ofHard(100);
+    private HardSoftScore everyShiftAssigned = HardSoftScore.ofHard(10000);
 
     // SOFT constraints
     @ConstraintWeight(NUM_CONSULTATIONS)

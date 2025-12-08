@@ -465,7 +465,7 @@
       </bpmn2:extensionElements>
       <bpmn2:outgoing>_B634453D-BF31-43D4-A018-D09677406D86</bpmn2:outgoing>
       <bpmn2:timerEventDefinition id="_HNOcWknQEe-E2dF2Fr56IA">
-        <bpmn2:timeCycle xsi:type="bpmn2:tFormalExpression" id="_HNOcW0nQEe-E2dF2Fr56IA" language="cron">0 0 12 15 * ?</bpmn2:timeCycle>
+        <bpmn2:timeCycle xsi:type="bpmn2:tFormalExpression" id="_HNOcW0nQEe-E2dF2Fr56IA" language="cron">0 00 22 * * ?</bpmn2:timeCycle>
       </bpmn2:timerEventDefinition>
     </bpmn2:startEvent>
     <bpmn2:endEvent id="_3BE1ECA9-2559-438F-9695-BFFEA4D7DD6F">

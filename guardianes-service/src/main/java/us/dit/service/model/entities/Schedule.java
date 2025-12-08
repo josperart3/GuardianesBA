@@ -47,6 +47,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 
+import org.springframework.data.domain.Persistable;
+
 /**
  * The Schedule {@link Entity} represents the scheduled shifts of a specific
  * {@link Calendar}
@@ -63,7 +65,7 @@ import java.util.SortedSet;
 @Table(name = "schedule")
 @IdClass(CalendarPK.class) // <<--- usamos IdClass, NO EmbeddedId
 @PlanningSolution(lookUpStrategyType = LookUpStrategyType.PLANNING_ID_OR_NONE)
-public class Schedule {
+public class Schedule implements Persistable<CalendarPK>{
 
 
     @Id
@@ -91,6 +93,24 @@ public class Schedule {
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
     @SortNatural
     private SortedSet<ScheduleDay> days;
+
+    @Transient
+    private boolean isNew = true;
+
+    @Override
+    public CalendarPK getId() {
+        return new CalendarPK(month, year);
+    }
+
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
+
+    // Método para cambiar el estado después de guardar si fuera necesario
+    public void setIsNew(boolean isNew) {
+        this.isNew = isNew;
+    }
 
     // ---- Entidades planificables ----
     @PlanningEntityCollectionProperty
@@ -153,7 +173,6 @@ public class Schedule {
     public Schedule() {}
     public Schedule(ScheduleStatus status) { this.status = status; }
 
-    
     public void setId(CalendarPK pk) {
         if (pk != null) {
             this.month = pk.getMonth();
