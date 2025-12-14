@@ -4,34 +4,24 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.optaplanner.core.api.solver.Solver;
 import org.optaplanner.core.api.solver.SolverFactory;
+import org.optaplanner.core.api.score.ScoreManager; 
 import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Lazy;
-
 import org.springframework.transaction.annotation.Transactional;
 
+import us.dit.service.model.entities.Calendar; 
 import us.dit.service.model.entities.*;
-import us.dit.service.model.entities.Calendar;
-import us.dit.service.model.entities.Schedule.ScheduleStatus;
-import us.dit.service.model.entities.Doctor.DoctorStatus;
 import us.dit.service.model.entities.primarykeys.CalendarPK;
-import us.dit.service.model.entities.score.GuardianesConstraintConfiguration;
-
 import us.dit.service.model.repositories.ShiftRepository;
 import us.dit.service.model.repositories.CalendarRepository;
 import us.dit.service.model.repositories.ScheduleRepository;
 import us.dit.service.model.repositories.DoctorRepository;
 import javax.persistence.EntityManager;
 
-/**
- * 
- */
 @Lazy
 @Slf4j
 @Service
@@ -44,229 +34,241 @@ public class OptaplannerGuardians {
     private final ShiftRepository shiftRepository;
     private final EntityManager entityManager;
 
+    private static final int GUARDIAS_POR_DIA = 2; 
+    private static final int SHIFTS_BASE_POR_LABORABLE = 2; // Mínimo base, pero puede subir
+
     @Transactional(timeout = 900)
     public Schedule solveProblem(YearMonth ym) {
         log.info(">>> 1. INICIO OptaplannerGuardians.solveProblem para {}", ym);
 
-        // 1. Construir y GUARDAR el problema inicial
+        // 1. Construir y GUARDAR el problema inicial con capacidad calculada
         Schedule managedProblem = buildAndSaveInitialProblem(ym);
         
-        log.info(">>> 2. Problema persistido en BBDD. Iniciando Solver...");
+        log.info(">>> 2. Problema persistido. Iniciando Solver...");
 
-        // 2. Configurar Solver
         SolverFactory<Schedule> factory = SolverFactory.createFromXmlResource("solver/guardianesSolverConfig.xml");
         Solver<Schedule> solver = factory.buildSolver();
 
         // 3. Resolver
-        Schedule bestSolutionClone = solver.solve(managedProblem);
+        Schedule bestSolution = solver.solve(managedProblem);
 
-        // --- CÓDIGO DE DIAGNÓSTICO ---
-        org.optaplanner.core.api.score.ScoreManager<Schedule> scoreManager = org.optaplanner.core.api.score.ScoreManager.create(factory);
+        // --- DIAGNÓSTICO DEL SCORE ---
+        ScoreManager<Schedule> scoreManager = ScoreManager.create(factory);
         log.info("--- EXPLICACIÓN DEL SCORE ---");
-        log.info(scoreManager.explainScore(bestSolutionClone));
+        log.info(scoreManager.explainScore(bestSolution));
         // -----------------------------
-        
-        log.info(">>> 3. Resolución completada! Score: {}", bestSolutionClone.getScore());
 
-        log.info("--- TURNOS SIN ASIGNAR ---");
-        bestSolutionClone.getShiftAssignments().stream()
-            .filter(sa -> sa.getDoctor() == null)
-            .forEach(sa -> log.info("VACÍO: Día {} - Tipo {}", sa.getDayConfiguration().getDate(), sa.getShift().getShiftType()));
+        log.info(">>> 3. Resolución completada! Score: {}", bestSolution.getScore());
 
-        // 4. ACTUALIZACIÓN Y SINCRONIZACIÓN
-        managedProblem.setStatus(Schedule.ScheduleStatus.PENDING_CONFIRMATION);
-        managedProblem.setScore(bestSolutionClone.getScore());
-
-        // --- FIX 1: Inicializar estructura Legacy (ScheduleDay) si es necesario ---
-        if (managedProblem.getDays() == null) {
-            managedProblem.setDays(new TreeSet<>()); 
-        }
-
-        // Si la lista está vacía, generamos los objetos ScheduleDay vacíos
-        if (managedProblem.getDays().isEmpty()) {
-            if (managedProblem.getDayConfigurationList() != null) {
-                for (DayConfiguration dc : managedProblem.getDayConfigurationList()) {
-                    ScheduleDay sd = new ScheduleDay();
-                    sd.setDay(dc.getDay());
-                    sd.setMonth(managedProblem.getMonth());
-                    sd.setYear(managedProblem.getYear());
-                    sd.setIsWorkingDay(dc.getIsWorkingDay());
-                    sd.setSchedule(managedProblem);
-                    
-                    // Inicializamos las listas internas con ArrayList (compatible con List)
-                    sd.setCycle(new ArrayList<>());
-                    sd.setShifts(new ArrayList<>());
-                    sd.setConsultations(new ArrayList<>());
-                    
-                    managedProblem.getDays().add(sd);
-                }
-            }
-        }
-
-        Map<Long, ShiftAssignment> solvedAssignmentsMap = bestSolutionClone.getShiftAssignments().stream()
-                .collect(Collectors.toMap(sa -> sa.getShift().getId(), sa -> sa));
-
-        // --- FIX 2: Sincronización de datos ---
-        for (ShiftAssignment managedAssignment : managedProblem.getShiftAssignments()) {
-            ShiftAssignment solvedAssignment = solvedAssignmentsMap.get(managedAssignment.getShift().getId());
-            
-            // Verificamos que exista la solución y que TENGA MÉDICO asignado
-            if (solvedAssignment != null && solvedAssignment.getDoctor() != null) {
-                
-                // A. Actualizamos la entidad OptaPlanner
-                managedAssignment.setDoctor(solvedAssignment.getDoctor());
-                
-                // B. Actualizamos la entidad Legacy (ScheduleDay) para la Vista HTML
-                int dayNum = managedAssignment.getShift().getDayConfiguration().getDay();
-                
-                ScheduleDay scheduleDay = managedProblem.getDays().stream()
-                    .filter(d -> d.getDay() == dayNum)
-                    .findFirst()
-                    .orElse(null);
-
-                if (scheduleDay != null) {
-                    // Protección defensiva adicional por si las listas vienen null de BBDD
-                    if (scheduleDay.getCycle() == null) scheduleDay.setCycle(new ArrayList<>());
-                    if (scheduleDay.getShifts() == null) scheduleDay.setShifts(new ArrayList<>());
-                    if (scheduleDay.getConsultations() == null) scheduleDay.setConsultations(new ArrayList<>());
-
-                    Doctor doctor = solvedAssignment.getDoctor();
-                    String type = managedAssignment.getShift().getShiftType();
-
-                    // Clasificamos el médico en la lista correcta según el tipo de turno
-                    switch (type) {
-                        case "GUARDIA": 
-                            scheduleDay.getCycle().add(doctor);
-                            break;
-                        case "CONSULTA":
-                            scheduleDay.getConsultations().add(doctor);
-                            break;
-                        default: // "TARDE"
-                            scheduleDay.getShifts().add(doctor);
-                            break;
-                    }
-                }
-            }
-        }
+        // 4. Actualizar visualización
+        updateScheduleWithSolution(managedProblem, bestSolution);
 
         // 5. Guardar cambios finales
-        Schedule savedSchedule = this.scheduleRepository.save(managedProblem);
-        
-        log.info(">>> 4. Planificación guardada correctamente en BBDD con estado PENDING_CONFIRMATION");
-        
-        return savedSchedule;
+        return this.scheduleRepository.saveAndFlush(managedProblem);
     }
 
     private Schedule buildAndSaveInitialProblem(YearMonth ym) {
         CalendarPK pk = new CalendarPK(ym.getMonthValue(), ym.getYear());
 
-        // --- LIMPIEZA ROBUSTA ---
-        log.info("Limpiando datos antiguos...");
-
-        // 1. PRIMERO: Borrar las asignaciones (Tabla hija final)
-        entityManager.createQuery("DELETE FROM ShiftAssignment sa WHERE sa.schedule.month = :m AND sa.schedule.year = :y")
-            .setParameter("m", ym.getMonthValue())
-            .setParameter("y", ym.getYear())
-            .executeUpdate();
-
-        // 2. SEGUNDO: Borrar los días (ScheduleDay)
-        entityManager.createQuery("DELETE FROM ScheduleDay sd WHERE sd.month = :m AND sd.year = :y")
-            .setParameter("m", ym.getMonthValue())
-            .setParameter("y", ym.getYear())
-            .executeUpdate();
-
-        // 3. TERCERO: Borrar el Schedule padre
-        entityManager.createQuery("DELETE FROM Schedule s WHERE s.month = :m AND s.year = :y")
-            .setParameter("m", ym.getMonthValue())
-            .setParameter("y", ym.getYear())
-            .executeUpdate();
-        
-        // 4. IMPORTANTE: Sincronizar y limpiar caché
-        scheduleRepository.flush();
-        entityManager.clear();
-        
-        // -------------------------------
+        // --- 1. LIMPIEZA ---
+        cleanOldData(ym);
 
         Calendar cal = this.calendarRepository.findById(pk)
-                .orElseThrow(() -> new RuntimeException("No se encontró calendario para " + ym));
+                .orElseThrow(() -> new RuntimeException("No se encontró calendario"));
 
-        log.info("Construyendo estructura inicial del problema...");
+        // --- 2. ANÁLISIS DE DEMANDA (MÉDICOS) ---
+        List<Doctor> allDoctors = this.doctorRepository.findAll().stream()
+                .filter(d -> d.getStatus() == Doctor.DoctorStatus.AVAILABLE && d.getShiftConfiguration() != null)
+                .collect(Collectors.toList());
 
-        // 2. Guardar Schedule Padre (Cabecera)
+        // A. Demanda de Consultas
+        int totalConsultasNecesarias = allDoctors.stream()
+                .mapToInt(d -> d.getShiftConfiguration().getNumConsultations())
+                .sum();
+        
+        // B. Demanda de Shifts (Cont. Asist) - ¡LA CLAVE DE TU CAMBIO!
+        int totalMinShiftsNecesarios = allDoctors.stream()
+                .mapToInt(d -> d.getShiftConfiguration().getMinShifts())
+                .sum();
+
+        // --- 3. PREPARACIÓN DE DÍAS ---
+        List<DayConfiguration> workingDays = new ArrayList<>();
+        // Mapa para controlar cuántos Shifts (Tarde) se crean cada día
+        Map<Integer, Integer> shiftsPerDayMap = new HashMap<>();
+
+        for (DayConfiguration dc : cal.getDayConfigurations()) {
+            // Inicializamos a 0
+            shiftsPerDayMap.put(dc.getDay(), 0); 
+            
+            if (dc.getIsWorkingDay()) {
+                workingDays.add(dc);
+                // Por defecto, ponemos la base (2)
+                shiftsPerDayMap.put(dc.getDay(), SHIFTS_BASE_POR_LABORABLE);
+            }
+        }
+
+        // --- 4. AJUSTE DE OFERTA VS DEMANDA (SHIFTS) ---
+        int capacidadBaseTotal = workingDays.size() * SHIFTS_BASE_POR_LABORABLE;
+        
+        log.info("ANÁLISIS DE CAPACIDAD: Se necesitan mínimo {} huecos de Cont. Asist. La base (2/día) ofrece {}.", 
+                 totalMinShiftsNecesarios, capacidadBaseTotal);
+
+        if (totalMinShiftsNecesarios > capacidadBaseTotal) {
+            int deficit = totalMinShiftsNecesarios - capacidadBaseTotal;
+            log.info(">>> DÉFICIT DETECTADO: Faltan {} huecos. Se añadirán dinámicamente.", deficit);
+            
+            // Repartimos el déficit entre los días laborables aleatoriamente
+            Collections.shuffle(workingDays); 
+            int i = 0;
+            while (deficit > 0) {
+                DayConfiguration dc = workingDays.get(i % workingDays.size());
+                int current = shiftsPerDayMap.get(dc.getDay());
+                
+                // Añadimos un hueco extra a este día
+                shiftsPerDayMap.put(dc.getDay(), current + 1);
+                
+                deficit--;
+                i++;
+            }
+        }
+
+        // --- 5. CREACIÓN FÍSICA DE LOS OBJETOS ---
         Schedule sch = new Schedule();
         sch.setId(pk);
         sch.setCalendar(cal);
         sch.setStatus(Schedule.ScheduleStatus.BEING_GENERATED);
         sch.setConstraintConfiguration(new us.dit.service.model.entities.score.GuardianesConstraintConfiguration(0L));
         
-        sch = this.scheduleRepository.saveAndFlush(sch);
+        // Inicializar listas para evitar NPE en Hibernate
+        sch.setShiftList(new ArrayList<>());
+        sch.setShiftAssignments(new ArrayList<>());
+        sch.setDoctorList(new ArrayList<>());
+        sch.setDayConfigurationList(new ArrayList<>());
 
-        // 3. Crear y GUARDAR Shifts (Turnos)
+        Schedule savedSchedule = this.scheduleRepository.saveAndFlush(sch);
         List<Shift> shiftsToSave = new ArrayList<>();
-        for (DayConfiguration dc : cal.getDayConfigurations()) {
-            if (Boolean.TRUE.equals(dc.getIsWorkingDay())) {
-                Integer numTardes = dc.getNumShifts() != null ? dc.getNumShifts() : 0;
-                Integer numConsultas = dc.getNumConsultations() != null ? dc.getNumConsultations() : 0;
 
-                for (int i = 0; i < numTardes; i++) shiftsToSave.add(createShift(dc, "TARDE", false, false));
-                for (int i = 0; i < numConsultas; i++) shiftsToSave.add(createShift(dc, "CONSULTA", false, true));
-            }
+        // Bucle principal de creación
+        for (DayConfiguration dc : cal.getDayConfigurations()) {
             
-            if (Boolean.TRUE.equals(dc.getIsWorkingDay()) && dc.getDay() % 2 == 0) {
+            // A. Guardias (Fijo: 2 por día)
+            for (int k = 0; k < GUARDIAS_POR_DIA; k++) {
                 shiftsToSave.add(createShift(dc, "GUARDIA", false, false));
             }
-        }
-        
-        log.info("Guardando {} turnos (Shifts)...", shiftsToSave.size());
-        
-        List<Shift> managedShifts = this.shiftRepository.saveAll(shiftsToSave);
-        this.shiftRepository.flush();
-        
-        if (sch.getShiftList() == null) sch.setShiftList(new ArrayList<>());
-        sch.getShiftList().clear();
-        sch.getShiftList().addAll(managedShifts);
 
-        // 4. Crear Assignments usando los Shifts GESTIONADOS
-        List<ShiftAssignment> assignments = new ArrayList<>();
-        
-        for (Shift s : managedShifts) {
-            ShiftAssignment sa = new ShiftAssignment(s);
-            sa.setSchedule(sch); 
-            assignments.add(sa);
-        }
-        
-        if (sch.getShiftAssignments() == null) {
-            sch.setShiftAssignments(new ArrayList<>());
-        }
-        
-        sch.getShiftAssignments().clear();
-        sch.getShiftAssignments().addAll(assignments);
-
-        // 5. Configurar resto de datos
-        List<Doctor> doctors = this.doctorRepository.findAll().stream()
-                .filter(d -> d.getStatus() == Doctor.DoctorStatus.AVAILABLE && d.getShiftConfiguration() != null)
-                .collect(Collectors.toList());
-
-        for(Doctor d : doctors) {
-            int currentMax = d.getShiftConfiguration().getMaxShifts();
-            if (currentMax > 0) {
-                d.getShiftConfiguration().setMaxShifts(30); 
+            // B. Shifts / Cont. Asist (Dinámico según el mapa calculado arriba)
+            // Si es festivo, el mapa devolverá 0. Si es laborable, devolverá 2, 3, o los que toquen.
+            int numShiftsHoy = shiftsPerDayMap.getOrDefault(dc.getDay(), 0);
+            for (int k = 0; k < numShiftsHoy; k++) {
+                shiftsToSave.add(createShift(dc, "TARDE", false, false));
             }
         }
+
+        // C. Consultas (Distribución en huecos libres laborables)
+        // Re-barajamos para que no coincida necesariamente con donde pusimos los shifts extra
+        Collections.shuffle(workingDays);
+        int consultasCreadas = 0;
+        int dayIndex = 0;
         
-        if(sch.getDoctorList() == null) sch.setDoctorList(new ArrayList<>());
-        sch.getDoctorList().clear();
-        sch.getDoctorList().addAll(doctors);
+        while (consultasCreadas < totalConsultasNecesarias && !workingDays.isEmpty()) {
+            DayConfiguration dc = workingDays.get(dayIndex % workingDays.size());
+            shiftsToSave.add(createShift(dc, "CONSULTA", false, true));
+            consultasCreadas++;
+            dayIndex++;
+        }
 
-        if(sch.getDayConfigurationList() == null) sch.setDayConfigurationList(new ArrayList<>());
-        sch.getDayConfigurationList().clear();
-        sch.getDayConfigurationList().addAll(cal.getDayConfigurations());
+        List<Shift> managedShifts = this.shiftRepository.saveAll(shiftsToSave);
+        this.shiftRepository.flush();
 
-        // 6. Guardado final
-        log.info("Guardando estructura completa (Assignments, Doctors, etc)...");
-        return this.scheduleRepository.saveAndFlush(sch);
+        // --- 6. VINCULACIÓN FINAL (Hibernate Safe) ---
+        
+        List<ShiftAssignment> newAssignments = managedShifts.stream()
+                .map(s -> {
+                    ShiftAssignment sa = new ShiftAssignment(s);
+                    sa.setSchedule(savedSchedule); 
+                    return sa;
+                }).collect(Collectors.toList());
+        
+        // Usar la colección existente
+        if(savedSchedule.getShiftAssignments() == null) savedSchedule.setShiftAssignments(new ArrayList<>());
+        savedSchedule.getShiftAssignments().clear();
+        savedSchedule.getShiftAssignments().addAll(newAssignments);
+
+        if(savedSchedule.getShiftList() == null) savedSchedule.setShiftList(new ArrayList<>());
+        savedSchedule.getShiftList().clear();
+        savedSchedule.getShiftList().addAll(managedShifts);
+
+        if(savedSchedule.getDoctorList() == null) savedSchedule.setDoctorList(new ArrayList<>());
+        savedSchedule.getDoctorList().clear();
+        savedSchedule.getDoctorList().addAll(allDoctors);
+
+        if(savedSchedule.getDayConfigurationList() == null) savedSchedule.setDayConfigurationList(new ArrayList<>());
+        savedSchedule.getDayConfigurationList().clear();
+        savedSchedule.getDayConfigurationList().addAll(cal.getDayConfigurations());
+
+        return this.scheduleRepository.saveAndFlush(savedSchedule);
     }
-    
+
+    private void updateScheduleWithSolution(Schedule managed, Schedule solution) {
+        managed.setStatus(Schedule.ScheduleStatus.PENDING_CONFIRMATION);
+        managed.setScore(solution.getScore());
+        
+        if (managed.getDays() == null) managed.setDays(new TreeSet<>());
+
+        if (managed.getDays().isEmpty()) {
+            for (DayConfiguration dc : managed.getDayConfigurationList()) {
+                ScheduleDay sd = new ScheduleDay();
+                sd.setDay(dc.getDay());
+                sd.setMonth(managed.getMonth());
+                sd.setYear(managed.getYear());
+                sd.setIsWorkingDay(dc.getIsWorkingDay());
+                sd.setSchedule(managed);
+                sd.setCycle(new ArrayList<>());
+                sd.setShifts(new ArrayList<>());
+                sd.setConsultations(new ArrayList<>());
+                managed.getDays().add(sd);
+            }
+        }
+
+        Map<Long, ShiftAssignment> solutionMap = solution.getShiftAssignments().stream()
+                .collect(Collectors.toMap(sa -> sa.getShift().getId(), sa -> sa));
+
+        for (ShiftAssignment managedSa : managed.getShiftAssignments()) {
+            ShiftAssignment solvedSa = solutionMap.get(managedSa.getShift().getId());
+            
+            if (solvedSa != null && solvedSa.getDoctor() != null) {
+                managedSa.setDoctor(solvedSa.getDoctor());
+                
+                int day = managedSa.getDayConfiguration().getDay();
+                ScheduleDay sd = managed.getDays().stream().filter(d -> d.getDay() == day).findFirst().orElse(null);
+                
+                if (sd != null) {
+                    if (sd.getCycle() == null) sd.setCycle(new ArrayList<>());
+                    if (sd.getShifts() == null) sd.setShifts(new ArrayList<>());
+                    if (sd.getConsultations() == null) sd.setConsultations(new ArrayList<>());
+
+                    Doctor doc = solvedSa.getDoctor();
+                    switch (managedSa.getShift().getShiftType()) {
+                        case "GUARDIA": sd.getCycle().add(doc); break;
+                        case "CONSULTA": sd.getConsultations().add(doc); break;
+                        case "TARDE": sd.getShifts().add(doc); break;
+                    }
+                }
+            }
+        }
+    }
+
+    private void cleanOldData(YearMonth ym) {
+        entityManager.createQuery("DELETE FROM ShiftAssignment sa WHERE sa.schedule.month = :m AND sa.schedule.year = :y")
+            .setParameter("m", ym.getMonthValue()).setParameter("y", ym.getYear()).executeUpdate();
+        entityManager.createQuery("DELETE FROM ScheduleDay sd WHERE sd.month = :m AND sd.year = :y")
+            .setParameter("m", ym.getMonthValue()).setParameter("y", ym.getYear()).executeUpdate();
+        entityManager.createQuery("DELETE FROM Schedule s WHERE s.month = :m AND s.year = :y")
+            .setParameter("m", ym.getMonthValue()).setParameter("y", ym.getYear()).executeUpdate();
+        scheduleRepository.flush();
+        entityManager.clear();
+    }
+
     private Shift createShift(DayConfiguration dc, String type, boolean skill, boolean consultation) {
         Shift s = new Shift();
         s.setShiftType(type);

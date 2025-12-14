@@ -1,6 +1,5 @@
 package us.dit.service.model.entities.score;
 
-
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.domain.constraintweight.ConstraintConfiguration;
 import org.optaplanner.core.api.domain.constraintweight.ConstraintWeight;
@@ -9,88 +8,60 @@ import us.dit.service.model.entities.AbstractPersistable;
 @ConstraintConfiguration(constraintPackage = "us.dit.service.model.entities.score")
 public class GuardianesConstraintConfiguration extends AbstractPersistable {
 
-    public static final String MAX_SHIFTS = "Maximun number of shifts in the afternoon for a doctor";
-    public static final String MIN_SHIFTS = "Minimun number of shifts in the afternoon for a doctor";
-    public static final String NUM_CONSULTATIONS = "Number of consultations a doctor do";
-    public static final String DOES_CYCLE_SHIFTS = "A doctor does night guards";
-    public static final String HAS_SHIFTS_ONLY_WHEN_CYCLE_SHIFTS = "A doctor does afternoon shifts when they do night guards";
-    public static final String UNWANTED_SHIFTS = "Unwanted afternoon shifts for a doctor during a week";
-    public static final String UNAVAILABLE_SHIFTS = "Unavailable afternoon shifts for a doctor during a week";
-    public static final String WANTED_SHIFTS = "Wanted afternoon shifts for a doctor during a week";
-    public static final String MANDATORY_SHIFTS = "Mandatory afternoon shifts for a doctor during a week";
-    public static final String WANTED_CONSULTATIONS = "Wanted consultations for a doctor during a week";
-    public static final String IS_WORKING_DAY = "Working day";
-    public static final String NUM_SHIFTS = "Number of afternoon shifts that should be in a day of the week";
-    public static final String NUM_CONSULTATIONS_IN_A_DAY = "Number of consultations in a day of the week";
-    public static final String HOLIDAYS = "Holidays for a doctor";
-    public static final String SKILL_REQUIRED = "Skill required for a doctor to work in this station";
-    public static final String MIN_DAYS_BETWEEN_CYCLE_SHIFTS = "Minimum number of days between night guards for a doctor";
-    public static final String ONE_PER_DAY = "One assignment per day per doctor";
+    // Reglas 
     public static final String EVERY_SHIFT_ASSIGNED = "Every shift must have a doctor";
-    public static final String ASSIGNED_DOCTOR = "Prefer assigned doctor";
-
-
-    public int maxShift = 30;
-    public int minShift = 3;
-
-    // HARD constraints
-    @ConstraintWeight(MAX_SHIFTS)
-    private HardSoftScore maxShifts = HardSoftScore.ofHard(10);
-
-    @ConstraintWeight(MIN_SHIFTS)
-    private HardSoftScore minShifts = HardSoftScore.ofSoft(1);
-
-    @ConstraintWeight(DOES_CYCLE_SHIFTS)
-    private HardSoftScore doesCycleShifts = HardSoftScore.ofHard(100);
-
-    @ConstraintWeight(HAS_SHIFTS_ONLY_WHEN_CYCLE_SHIFTS)
-    private HardSoftScore hasShiftsOnlyWhenCycleShifts = HardSoftScore.ofHard(1);
-
-    @ConstraintWeight(UNAVAILABLE_SHIFTS)
-    private HardSoftScore unavailableShifts = HardSoftScore.ofHard(10);
-
-    @ConstraintWeight(MANDATORY_SHIFTS)
-    private HardSoftScore mandatoryShifts = HardSoftScore.ofHard(10);
-
-    @ConstraintWeight(IS_WORKING_DAY)
-    private HardSoftScore isWorkingDay = HardSoftScore.ofHard(100);
-
-    @ConstraintWeight(NUM_SHIFTS)
-    private HardSoftScore numShifts = HardSoftScore.ofHard(1);
-
-    @ConstraintWeight(NUM_CONSULTATIONS_IN_A_DAY)
-    private HardSoftScore numConsultationsInDay = HardSoftScore.ofHard(1);
-
-    @ConstraintWeight(HOLIDAYS)
-    private HardSoftScore holidays = HardSoftScore.ofHard(100);
-
-    @ConstraintWeight(MIN_DAYS_BETWEEN_CYCLE_SHIFTS)
-    private HardSoftScore minDaysBetweenCycleShifts = HardSoftScore.ofHard(100);
-
-    @ConstraintWeight(SKILL_REQUIRED)
-    private HardSoftScore skillRequired = HardSoftScore.ofHard(10);
-    
-    @ConstraintWeight(ONE_PER_DAY)
-    private HardSoftScore onePerDay = HardSoftScore.ofHard(10);
+    public static final String ELIGIBILITY_CYCLE = "Doctor eligibility for Guardias";
+    public static final String HOLIDAYS = "Holidays for a doctor";
+    public static final String INCOMPATIBLE_CONSULTA = "Incompatible: Consulta is exclusive";
+    public static final String INCOMPATIBLE_DUPLICATES = "Incompatible: No duplicate types";
+    public static final String CONDITIONAL_SHIFTS = "Linking: Shifts only when Cycle Shifts"; 
+    public static final String DOCTOR_MAX_SHIFTS = "Doctor Max Shifts (Cont. Asist)";
+    public static final String DOCTOR_SPECIFIC_CONSULTATIONS = "Strict Consultations Count";
+    public static final String DOCTOR_MIN_SHIFTS_HARD = "Doctor Min Shifts Hard (Cont. Asist)";
+    public static final String FAIRNESS_GUARDIAS = "Fairness in Guardias";
+    public static final String MIN_DAYS_BETWEEN_GUARDIAS = "Minimum days between Guardias";
+    public static final String AVOID_CONSECUTIVE_TARDES = "Avoid consecutive Tardes";
+ 
+    // Hard Constraints 
 
     @ConstraintWeight(EVERY_SHIFT_ASSIGNED)
-    private HardSoftScore everyShiftAssigned = HardSoftScore.ofHard(10000);
+    private HardSoftScore everyShiftAssigned = HardSoftScore.ofHard(100);
 
-    // SOFT constraints
-    @ConstraintWeight(NUM_CONSULTATIONS)
-    private HardSoftScore num_consultations = HardSoftScore.ofSoft(1);
+    @ConstraintWeight(ELIGIBILITY_CYCLE)
+    private HardSoftScore eligibilityCycle = HardSoftScore.ofHard(1000);
 
-    @ConstraintWeight(UNWANTED_SHIFTS)
-    private HardSoftScore unwantedShifts = HardSoftScore.ofSoft(10);
+    @ConstraintWeight(HOLIDAYS)
+    private HardSoftScore holidays = HardSoftScore.ofHard(1000);
 
-    @ConstraintWeight(WANTED_SHIFTS)
-    private HardSoftScore wantedShifts = HardSoftScore.ofSoft(10);
+    @ConstraintWeight(INCOMPATIBLE_CONSULTA)
+    private HardSoftScore incompatibleConsulta = HardSoftScore.ofHard(1000);
 
-    @ConstraintWeight(WANTED_CONSULTATIONS)
-    private HardSoftScore wantedConsultations = HardSoftScore.ofSoft(10);
+    @ConstraintWeight(INCOMPATIBLE_DUPLICATES)
+    private HardSoftScore incompatibleDuplicates = HardSoftScore.ofHard(1000);
 
-    @ConstraintWeight(ASSIGNED_DOCTOR)
-    private HardSoftScore assigned_doctor = HardSoftScore.ofSoft(1);
+    @ConstraintWeight(CONDITIONAL_SHIFTS)
+    private HardSoftScore conditionalShifts = HardSoftScore.ofHard(1000);
+
+    @ConstraintWeight(DOCTOR_MAX_SHIFTS)
+    private HardSoftScore doctorMaxShifts = HardSoftScore.ofHard(100);
+
+    @ConstraintWeight(DOCTOR_SPECIFIC_CONSULTATIONS)
+    private HardSoftScore doctorSpecificConsultations = HardSoftScore.ofHard(100);
+    
+    @ConstraintWeight(DOCTOR_MIN_SHIFTS_HARD)
+    private HardSoftScore doctorMinShiftsHard = HardSoftScore.ofHard(100);
+
+    // Soft Constraints
+
+    @ConstraintWeight(FAIRNESS_GUARDIAS)
+    private HardSoftScore fairnessGuardias = HardSoftScore.ofSoft(10);
+
+    @ConstraintWeight(MIN_DAYS_BETWEEN_GUARDIAS)
+    private HardSoftScore minDaysBetweenGuardias = HardSoftScore.ofSoft(50);
+    
+    @ConstraintWeight(AVOID_CONSECUTIVE_TARDES)
+    private HardSoftScore avoidConsecutiveTardes = HardSoftScore.ofSoft(10);
+
 
     public GuardianesConstraintConfiguration() {
     }
@@ -99,171 +70,103 @@ public class GuardianesConstraintConfiguration extends AbstractPersistable {
         super(id);
     }
 
-    public HardSoftScore getMaxShifts() {
-        return maxShifts;
-    }
-
-    public void setMaxShifts(HardSoftScore maxShifts) {
-        this.maxShifts = maxShifts;
-    }
-
-    public HardSoftScore getMinShifts() {
-        return minShifts;
-    }
-
-    public void setMinShifts(HardSoftScore minShifts) {
-        this.minShifts = minShifts;
-    }
-
-    public HardSoftScore getDoesCycleShifts() {
-        return doesCycleShifts;
-    }
-
-    public void setDoesCycleShifts(HardSoftScore doesCycleShifts) {
-        this.doesCycleShifts = doesCycleShifts;
-    }
-
-    public HardSoftScore getHasShiftsOnlyWhenCycleShifts() {
-        return hasShiftsOnlyWhenCycleShifts;
-    }
-
-    public void setHasShiftsOnlyWhenCycleShifts(HardSoftScore hasShiftsOnlyWhenCycleShifts) {
-        this.hasShiftsOnlyWhenCycleShifts = hasShiftsOnlyWhenCycleShifts;
-    }
-
-    public HardSoftScore getUnavailableShifts() {
-        return unavailableShifts;
-    }
-
-    public void setUnavailableShifts(HardSoftScore unavailableShifts) {
-        this.unavailableShifts = unavailableShifts;
-    }
-
-    public HardSoftScore getMandatoryShifts() {
-        return mandatoryShifts;
-    }
-
-    public void setMandatoryShifts(HardSoftScore mandatoryShifts) {
-        this.mandatoryShifts = mandatoryShifts;
-    }
-
-    public HardSoftScore getIsWorkingDay() {
-        return isWorkingDay;
-    }
-
-    public void setIsWorkingDay(HardSoftScore isWorkingDay) {
-        this.isWorkingDay = isWorkingDay;
-    }
-
-    public HardSoftScore getNumShifts() {
-        return numShifts;
-    }
-
-    public void setNumShifts(HardSoftScore numShifts) {
-        this.numShifts = numShifts;
-    }
-
-    public HardSoftScore getNumConsultationsInDay() {
-        return numConsultationsInDay;
-    }
-
-    public void setNumConsultationsInDay(HardSoftScore numConsultationsInDay) {
-        this.numConsultationsInDay = numConsultationsInDay;
-    }
-
-    public HardSoftScore getHolidays() {
-        return holidays;
-    }
-
-    public void setHolidays(HardSoftScore holidays) {
-        this.holidays = holidays;
-    }
-
-    public HardSoftScore getMinDaysBetweenCycleShifts() {
-        return minDaysBetweenCycleShifts;
-    }
-
-    public void setMinDaysBetweenCycleShifts(HardSoftScore minDaysBetweenCycleShifts) {
-        this.minDaysBetweenCycleShifts = minDaysBetweenCycleShifts;
-    }
-
-    public HardSoftScore getSkillRequired() {
-        return skillRequired;
-    }
-
-    public void setSkillRequired(HardSoftScore skillRequired) {
-        this.skillRequired = skillRequired;
-    }
-
-    public HardSoftScore getNum_consultations() {
-        return num_consultations;
-    }
-
-    public void setNum_consultations(HardSoftScore num_consultations) {
-        this.num_consultations = num_consultations;
-    }
-
-    public HardSoftScore getUnwantedShifts() {
-        return unwantedShifts;
-    }
-
-    public void setUnwantedShifts(HardSoftScore unwantedShifts) {
-        this.unwantedShifts = unwantedShifts;
-    }
-
-    public HardSoftScore getWantedShifts() {
-        return wantedShifts;
-    }
-
-    public void setWantedShifts(HardSoftScore wantedShifts) {
-        this.wantedShifts = wantedShifts;
-    }
-
-    public HardSoftScore getWantedConsultations() {
-        return wantedConsultations;
-    }
-
-    public void setWantedConsultations(HardSoftScore wantedConsultations) {
-        this.wantedConsultations = wantedConsultations;
-    }
-
-    public HardSoftScore getOnePerDay(){
-        return onePerDay;
-    }
-
-    public void setOnePerDay(HardSoftScore onePerDay){
-        this.onePerDay = onePerDay;
-    }
-
-    public int getMaxShift() {
-        return maxShift;
-    }
-
-    public void setMaxShifts(int maxShift) {
-        this.maxShift = maxShift;
-    }
-
-    public int getMinShift() {
-        return minShift;
-    }
-
-    public void setMinShifts(int minShift) {
-        this.minShift = minShift;
-    }
+    // ========================================================================
+    // GETTERS Y SETTERS
+    // ========================================================================
 
     public HardSoftScore getEveryShiftAssigned(){
-        return everyShiftAssigned;
+        return everyShiftAssigned; 
+    }
+    
+    public void setEveryShiftAssigned(HardSoftScore s){
+        this.everyShiftAssigned = s; 
     }
 
-    public void setEveryShiftAssigned(HardSoftScore everyShiftAssigned){
-        this.everyShiftAssigned = everyShiftAssigned;
+    public HardSoftScore getEligibilityCycle(){
+        return eligibilityCycle;
+    }
+    
+    public void setEligibilityCycle(HardSoftScore s){
+        this.eligibilityCycle = s; 
     }
 
-    public HardSoftScore getAssignedDoctor(){
-        return assigned_doctor;
+    public HardSoftScore getHolidays(){
+        return holidays;
+    }
+    
+    public void setHolidays(HardSoftScore s){
+        this.holidays = s;
     }
 
-    public void setAssignedDoctor(HardSoftScore assigned_doctor){
-        this.assigned_doctor = assigned_doctor;
+    public HardSoftScore getIncompatibleConsulta(){
+        return incompatibleConsulta;
+    }
+    
+    public void setIncompatibleConsulta(HardSoftScore s){
+        this.incompatibleConsulta = s;
+    }
+
+    public HardSoftScore getIncompatibleDuplicates(){
+        return incompatibleDuplicates;
+    }
+    
+    public void setIncompatibleDuplicates(HardSoftScore s){
+        this.incompatibleDuplicates = s;
+    }
+
+    public HardSoftScore getConditionalShifts(){
+        return conditionalShifts;
+    }
+    
+    public void setConditionalShifts(HardSoftScore s){ 
+        this.conditionalShifts = s;
+    }
+
+    public HardSoftScore getDoctorMaxShifts(){ 
+        return doctorMaxShifts; 
+    }
+    
+    public void setDoctorMaxShifts(HardSoftScore s){ 
+        this.doctorMaxShifts = s; 
+    }
+
+    public void setDoctorSpecificConsultations(HardSoftScore s){ 
+        this.doctorSpecificConsultations = s; 
+    }
+    
+    public HardSoftScore getDoctorMinShiftsHard(){ 
+        return doctorMinShiftsHard; 
+    }
+    
+    public void setDoctorMinShiftsHard(HardSoftScore s){ 
+        this.doctorMinShiftsHard = s; 
+    }
+    
+    public HardSoftScore getDoctorSpecificConsultations(){ 
+        return doctorSpecificConsultations; 
+    }
+    
+    public HardSoftScore getFairnessGuardias(){ 
+        return fairnessGuardias; 
+    }
+    
+    public void setFairnessGuardias(HardSoftScore s){ 
+        this.fairnessGuardias = s; 
+    }
+
+    public HardSoftScore getMinDaysBetweenGuardias(){ 
+        return minDaysBetweenGuardias; 
+    }
+    
+    public void setMinDaysBetweenGuardias(HardSoftScore s){ 
+        this.minDaysBetweenGuardias = s; 
+    }
+
+    public HardSoftScore getAvoidConsecutiveTardes(){ 
+        return avoidConsecutiveTardes; 
+    }
+    
+    public void setAvoidConsecutiveTardes(HardSoftScore s){ 
+        this.avoidConsecutiveTardes = s; 
     }
 }
