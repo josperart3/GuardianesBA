@@ -18,7 +18,7 @@ dialect "mvel"
 rule "Every shift must have a doctor"
 // Ensures that every generated shift has a doctor assigned
 // It penalizes any shift with no doctor == null
-    when
+    when 
         $config : GuardianesConstraintConfiguration()
         ShiftAssignment( doctor == null )
     then
