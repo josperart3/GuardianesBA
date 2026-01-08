@@ -16,6 +16,8 @@ dialect "mvel"
 // ============================================================================
 
 rule "Every shift must have a doctor"
+// Ensures that every generated shift has a doctor assigned
+// It penalizes any shift with no doctor == null
     when
         $config : GuardianesConstraintConfiguration()
         ShiftAssignment( doctor == null )
@@ -24,6 +26,7 @@ rule "Every shift must have a doctor"
 end
 
 rule "Doctor eligibility for Guardias"
+// Prevents assigning a "GUARDIA" shift to a doctor who is not eligible to perform them (checked via 'doesCycleShifts == false')
     when
         $config : GuardianesConstraintConfiguration()
         ShiftAssignment(
@@ -36,6 +39,8 @@ rule "Doctor eligibility for Guardias"
 end
 
 rule "Holidays for a doctor"
+// Respects time off It penalizes the score if a shift is assigned 
+// It penalizes the score if a shift is assigned to a doctor on a date marked as an absence (holiday, sick leave, etc.)
     when
         $config : GuardianesConstraintConfiguration()
         ShiftAssignment(
@@ -48,6 +53,8 @@ rule "Holidays for a doctor"
 end
 
 rule "Incompatible: Consulta is exclusive"
+// Defines "CONSULTA" as an exclusive shift. 
+// If a doctor has a consultation, they cannot be assigned any other shift type on the same day
     when
         $config : GuardianesConstraintConfiguration()
         $d : Doctor()
@@ -59,6 +66,7 @@ rule "Incompatible: Consulta is exclusive"
 end
 
 rule "Incompatible: No duplicate types"
+// Prevents a doctor from having two shifts of the exact same type assigned on the same day
     when
         $config : GuardianesConstraintConfiguration()
         $d : Doctor()
@@ -71,6 +79,8 @@ rule "Incompatible: No duplicate types"
 end
 
 rule "Linking: Shifts only when Cycle Shifts"
+// For doctors with this specific constraint ('hasShiftsOnlyWhenCycleShifts'),
+// a "TARDE" shift is only valid if they are also assigned a "GUARDIA" shift on that same day
     when
         $config : GuardianesConstraintConfiguration()
         $doc : Doctor(shiftConfiguration.hasShiftsOnlyWhenCycleShifts == true)
@@ -91,6 +101,7 @@ rule "Linking: Shifts only when Cycle Shifts"
 end
 
 rule "Doctor Max Shifts (Cont. Asist)"
+// Penalizes the solution if the number of "TARDE" shifts assigned to a doctor exceeds their maximum contractual limit
     when
         $config : GuardianesConstraintConfiguration()
         $doc : Doctor($max : shiftConfiguration.maxShifts)
@@ -103,9 +114,8 @@ rule "Doctor Max Shifts (Cont. Asist)"
         scoreHolder.addHardConstraintMatch(kcontext, - ($config.getDoctorMaxShifts().getHardScore() * penalization));
 end
 
-// ESTA ES LA REGLA QUE DABA EL ERROR DE SINCRONIZACIÓN
-// Asegúrate de que el nombre coincide con DOCTOR_MIN_SHIFTS_HARD en Java
 rule "Doctor Min Shifts Hard (Cont. Asist)"
+// Penalizes the solution if the number of "TARDE" shifts assigned to a doctor falls behind their minimum contractual limit
     when
         $config : GuardianesConstraintConfiguration()
         $doc : Doctor($min : shiftConfiguration.minShifts)
@@ -119,6 +129,7 @@ rule "Doctor Min Shifts Hard (Cont. Asist)"
 end
 
 rule "Strict Consultations Count"
+// Enforces that a doctor is assigned exactly the number of "CONSULTA" shifts defined in their contract 
     when
         $config : GuardianesConstraintConfiguration()
         $doc : Doctor($expected : shiftConfiguration.numConsultations, $expected > 0)
@@ -138,6 +149,8 @@ end
 // ============================================================================
 
 rule "Fairness in Guardias"
+// Aims to distribute "GUARDIA" shifts evenly among all doctors
+// It uses a quadratic penalty (N^2) to punish outliers (doctors with significantly more shifts) more severely
     when
         $config : GuardianesConstraintConfiguration()
         $doc : Doctor(shiftConfiguration.doesCycleShifts == true)
@@ -151,6 +164,7 @@ rule "Fairness in Guardias"
 end
 
 rule "Minimum days between Guardias"
+// Attempts to enforce a spacing of at least 3 days between two "GUARDIA" shifts for the same doctor to ensure adequate rest
     when
         $config : GuardianesConstraintConfiguration()
         $a1 : ShiftAssignment($d : doctor, shift.shiftType == "GUARDIA", $date1 : dayConfiguration.date, $id1 : id)
@@ -161,6 +175,7 @@ rule "Minimum days between Guardias"
 end
 
 rule "Avoid consecutive Tardes"
+// Tries to avoid assigning "TARDE" shifts on consecutive days to prevent fatigue and improve the doctor's schedule quality
     when
         $config : GuardianesConstraintConfiguration()
         $d : Doctor()
