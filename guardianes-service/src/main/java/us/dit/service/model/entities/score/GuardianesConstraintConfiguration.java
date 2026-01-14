@@ -1,3 +1,20 @@
+/**
+*  This file is part of GuardianesBA - Business Application for processes managing healthcare tasks planning and supervision.
+*  Copyright (C) 2026  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*
+*  GuardianesBA is free software: you can redistribute it and/or
+*  modify it under the terms of the GNU General Public License as published
+*  by the Free Software Foundation, either version 3 of the License, or (at
+*  your option) any later version.
+*
+*  GuardianesBA is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+*  Public License for more details.
+*
+*  You should have received a copy of the GNU General Public License along
+*  with GuardianesBA. If not, see <https://www.gnu.org/licenses/>.
+**/
 package us.dit.service.model.entities.score;
 
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
@@ -5,6 +22,14 @@ import org.optaplanner.core.api.domain.constraintweight.ConstraintConfiguration;
 import org.optaplanner.core.api.domain.constraintweight.ConstraintWeight;
 import us.dit.service.model.entities.AbstractPersistable;
 
+
+/**
+ * This class defines the constraint configuration
+ * that are used to manage weights and penalties for the scheduling rules required
+ * by the OptaPlanner solver
+ * 
+ * @author josperart3
+ */
 @ConstraintConfiguration(constraintPackage = "us.dit.service.model.entities.score")
 public class GuardianesConstraintConfiguration extends AbstractPersistable {
 
@@ -21,7 +46,7 @@ public class GuardianesConstraintConfiguration extends AbstractPersistable {
     public static final String FAIRNESS_GUARDIAS = "Fairness in Guardias";
     public static final String MIN_DAYS_BETWEEN_GUARDIAS = "Minimum days between Guardias";
     public static final String AVOID_CONSECUTIVE_TARDES = "Avoid consecutive Tardes";
- 
+
     // Hard Constraints 
 
     @ConstraintWeight(EVERY_SHIFT_ASSIGNED)

@@ -20,18 +20,14 @@ package us.dit.service.model.entities;
 import lombok.Data;
 
 import org.hibernate.annotations.SortNatural;
-import org.hibernate.validator.constraints.Range;
 import us.dit.service.model.entities.primarykeys.CalendarPK;
-import us.dit.service.model.validation.annotations.ValidSchedule;
 
 import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
 import org.optaplanner.core.api.domain.solution.PlanningSolution;
-import org.optaplanner.core.api.domain.solution.ProblemFactProperty;
 import org.optaplanner.core.api.domain.lookup.LookUpStrategyType;
 
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
 import org.optaplanner.core.api.domain.solution.PlanningScore;
-import org.optaplanner.core.api.domain.lookup.PlanningId;
 import org.optaplanner.core.api.domain.solution.ProblemFactCollectionProperty;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 

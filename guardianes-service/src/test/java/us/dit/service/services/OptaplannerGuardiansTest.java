@@ -1,8 +1,23 @@
+/**
+* This file is part of GuardianesBA - Business Application for processes managing healthcare tasks planning and supervision.
+* Copyright (C) 2026  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*
+* GuardianesBA is free software: you can redistribute it and/or
+* modify it under the terms of the GNU General Public License as published
+* by the Free Software Foundation, either version 3 of the License, or (at
+* your option) any later version.
+*
+* GuardianesBA is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+* Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with GuardianesBA. If not, see <https://www.gnu.org/licenses/>.
+**/
 package us.dit.service.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -13,9 +28,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
-
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
@@ -36,6 +48,11 @@ import us.dit.service.model.repositories.DoctorRepository;
 import us.dit.service.model.repositories.ScheduleRepository;
 import us.dit.service.model.repositories.ShiftRepository;
 
+/**
+ * Test class used to verify the scheduling logic and 
+ * demand calculation in OptaplannerGuardians.
+ * * @author josperart3
+ */
 public class OptaplannerGuardiansTest {
     
     private OptaplannerGuardians planner;
@@ -70,6 +87,7 @@ public class OptaplannerGuardiansTest {
         );
     }
 
+    //Primer test donde hay que añadir más de dos turnos (Shifts) en algunos días para cubrir toda la demanda
     @Test
     void testElasticDemandGeneration_HighDemand() {
         System.out.println("\n--- [Test Alta Demanda (Elástico)] ---");
@@ -99,6 +117,7 @@ public class OptaplannerGuardiansTest {
         assertEquals(totalDemand, totalTardes, "Debe haber crecido para cubrir la demanda.");
     }
 
+    //Segundo test donde la capacidad es mayor que la demanda
     @Test
     void testElasticDemandGeneration_LowDemand() {
         System.out.println("\n--- [Test Baja Demanda (Base)] ---");
@@ -125,15 +144,13 @@ public class OptaplannerGuardiansTest {
         assertEquals(baseCapacity, totalTardes, "Se debe respetar la capacidad base del hospital.");
     }
 
-    // --- Helpers de Configuración ---
+    // Helpers de configuracion
 
     private void setupMockRepositories(YearMonth ym, int numDoctors, int consultationsPerDoc, int minShiftsPerDoc) {
         CalendarPK pk = new CalendarPK(ym.getMonthValue(), ym.getYear());
         Calendar calendar = buildTestCalendar(ym);
         
         when(calendarRepository.findById(pk)).thenReturn(Optional.of(calendar));
-        
-        // --- AQUÍ ESTÁ EL FIX: Simular generación de IDs ---
         
         // 1. Mock ShiftRepository: Asigna IDs a los Shifts
         when(shiftRepository.saveAll(any())).thenAnswer(i -> {

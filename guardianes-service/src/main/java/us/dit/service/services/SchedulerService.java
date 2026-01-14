@@ -42,10 +42,17 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 /**
- * This class is responsible for dealing with the communication with the
- * Scheduler system, whenever a {@link Schedule} is to be generated
+ * Service responsible for generating and optimizing the medical schedule using OptaPlanner.
+ * 
+ * This class handles the orchestration of the solving process, including:
+ * 
+ * Analyzing the resource demand (doctors' contracts) to calculate the necessary capacity (elastic demand).
+ * Building the initial {@link Schedule} problem with unassigned shifts.
+ * Running the Solver to find the best assignment according to hard/soft constraints.
+ * Persisting the final solution and mapping it back to the persistence layer.
+ * 
  *
- * @author miggoncan
+ * @author josperart3
  */
 @Lazy
 @Slf4j
@@ -93,25 +100,31 @@ public class SchedulerService {
 	        //    (solve(...) bloquea hasta obtener la mejor solución)
 	        SolverJob<Schedule, CalendarPK> job = solverManager.solve(problemId, workingSchedule);
 	        Schedule bestSolution = job.getFinalBestSolution(); // bloquea hasta la mejor solución
-	
-	        // 4) Persistir la mejor solución
-	        bestSolution.setStatus(ScheduleStatus.PENDING_CONFIRMATION); 
-	        // Importante para JPA: asegurar que las asociaciones bidireccionales están bien
-	        if (bestSolution.getShiftAssignments() != null) {
-	            bestSolution.getShiftAssignments().forEach(a -> a.setSchedule(bestSolution));
-	        }
-	        scheduleRepository.saveAndFlush(bestSolution);
-	
-	        log.info("Planificación {}/{} generada y persistida con score={}", month, year, bestSolution.getScore());
-       
+
+	        workingSchedule.setShiftAssignments(bestSolution.getShiftAssignments());
+            workingSchedule.setScore(bestSolution.getScore()); 
+
+
+            if (workingSchedule.getShiftAssignments() != null) {
+                workingSchedule.getShiftAssignments().forEach(a -> a.setSchedule(workingSchedule));
+            }
+
+            // 3. Actualizamos el estado en la entidad gestionada
+            workingSchedule.setStatus(ScheduleStatus.PENDING_CONFIRMATION);
+
+            // 4. Guardamos la entidad gestionada
+            scheduleRepository.saveAndFlush(workingSchedule);
+
+            log.info("Planificación {}/{} generada y persistida. Estado final: {}", month, year, workingSchedule.getStatus());
+        
         } catch(InterruptedException e) {
-        	Thread.currentThread().interrupt();
+            Thread.currentThread().interrupt();
             log.error("Solver interrumpido para {}/{}", month, year, e);
             workingSchedule.setStatus(ScheduleStatus.GENERATION_ERROR);
             scheduleRepository.saveAndFlush(workingSchedule);
         
         } catch(ExecutionException e) {
-        	log.error("Error durante la resolución del solver para {}/{}", month, year, e);
+            log.error("Error durante la resolución del solver para {}/{}", month, year, e);
             workingSchedule.setStatus(ScheduleStatus.GENERATION_ERROR);
             scheduleRepository.save(workingSchedule);
         }
@@ -148,8 +161,7 @@ public class SchedulerService {
 
         // 2.4 ShiftAssignments (entidades planificables)
         // Crea un ShiftAssignment por cada Shift si no existe ya.
-        List<ShiftAssignment> existing = Optional.ofNullable(schedule.getShiftAssignments())
-        	    .orElseGet(ArrayList::new);
+        List<ShiftAssignment> existing = Optional.ofNullable(schedule.getShiftAssignments()).orElseGet(ArrayList::new);
 
         	Map<Long, ShiftAssignment> currentByShiftId = existing.stream()
         	    .filter(sa -> sa.getShift() != null)
@@ -159,6 +171,7 @@ public class SchedulerService {
         	        (a, b) -> a,
         	        LinkedHashMap::new
         	    ));
+
         List<ShiftAssignment> assignments = new ArrayList<>(shifts.size());
         for (Shift shift : shifts) {
             ShiftAssignment saExisting = currentByShiftId.get(shift.getId());

@@ -1,3 +1,20 @@
+/**
+*  This file is part of GuardianesBA - Business Application for processes managing healthcare tasks planning and supervision.
+*  Copyright (C) 2024  Universidad de Sevilla/Departamento de Ingeniería Telemática
+*
+*  GuardianesBA is free software: you can redistribute it and/or
+*  modify it under the terms of the GNU General Public License as published
+*  by the Free Software Foundation, either version 3 of the License, or (at
+*  your option) any later version.
+*
+*  GuardianesBA is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+*  Public License for more details.
+*
+*  You should have received a copy of the GNU General Public License along
+*  with GuardianesBA. If not, see <https://www.gnu.org/licenses/>.
+**/
 package us.dit.service.services;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +39,11 @@ import us.dit.service.model.repositories.ScheduleRepository;
 import us.dit.service.model.repositories.DoctorRepository;
 import javax.persistence.EntityManager;
 
+/**
+ * Service responsible for building the problem dataset and 
+ * invoking the OptaPlanner solver to generate the schedule.
+ * * @author josperart3
+ */
 @Lazy
 @Slf4j
 @Service
@@ -41,7 +63,7 @@ public class OptaplannerGuardians {
     public Schedule solveProblem(YearMonth ym) {
         log.info(">>> 1. INICIO OptaplannerGuardians.solveProblem para {}", ym);
 
-        // 1. Construir y GUARDAR el problema inicial con capacidad calculada
+        // Construir y GUARDAR el problema inicial con capacidad calculada
         Schedule managedProblem = buildAndSaveInitialProblem(ym);
         
         log.info(">>> 2. Problema persistido. Iniciando Solver...");
@@ -49,7 +71,7 @@ public class OptaplannerGuardians {
         SolverFactory<Schedule> factory = SolverFactory.createFromXmlResource("solver/guardianesSolverConfig.xml");
         Solver<Schedule> solver = factory.buildSolver();
 
-        // 3. Resolver
+        //  Resolver
         Schedule bestSolution = solver.solve(managedProblem);
 
         // --- DIAGNÓSTICO DEL SCORE ---
@@ -60,38 +82,38 @@ public class OptaplannerGuardians {
 
         log.info(">>> 3. Resolución completada! Score: {}", bestSolution.getScore());
 
-        // 4. Actualizar visualización
+        // Actualizar visualización
         updateScheduleWithSolution(managedProblem, bestSolution);
 
-        // 5. Guardar cambios finales
+        // Guardar cambios finales
         return this.scheduleRepository.saveAndFlush(managedProblem);
     }
 
     private Schedule buildAndSaveInitialProblem(YearMonth ym) {
         CalendarPK pk = new CalendarPK(ym.getMonthValue(), ym.getYear());
 
-        // --- 1. LIMPIEZA ---
+        // --- LIMPIEZA ---
         cleanOldData(ym);
 
         Calendar cal = this.calendarRepository.findById(pk)
                 .orElseThrow(() -> new RuntimeException("No se encontró calendario"));
 
-        // --- 2. ANÁLISIS DE DEMANDA (MÉDICOS) ---
+        // --- ANÁLISIS DE DEMANDA (MÉDICOS) ---
         List<Doctor> allDoctors = this.doctorRepository.findAll().stream()
                 .filter(d -> d.getStatus() == Doctor.DoctorStatus.AVAILABLE && d.getShiftConfiguration() != null)
                 .collect(Collectors.toList());
 
-        // A. Demanda de Consultas
+        // Demanda de Consultas
         int totalConsultasNecesarias = allDoctors.stream()
                 .mapToInt(d -> d.getShiftConfiguration().getNumConsultations())
                 .sum();
         
-        // B. Demanda de Shifts (Cont. Asist) - ¡LA CLAVE DE TU CAMBIO!
+        //  Demanda de Shifts (Cont. Asist) - ¡LA CLAVE DE TU CAMBIO!
         int totalMinShiftsNecesarios = allDoctors.stream()
                 .mapToInt(d -> d.getShiftConfiguration().getMinShifts())
                 .sum();
 
-        // --- 3. PREPARACIÓN DE DÍAS ---
+        // --- PREPARACIÓN DE DÍAS ---
         List<DayConfiguration> workingDays = new ArrayList<>();
         // Mapa para controlar cuántos Shifts (Tarde) se crean cada día
         Map<Integer, Integer> shiftsPerDayMap = new HashMap<>();
@@ -107,11 +129,11 @@ public class OptaplannerGuardians {
             }
         }
 
-        // --- 4. AJUSTE DE OFERTA VS DEMANDA (SHIFTS) ---
+        // --- AJUSTE DE OFERTA VS DEMANDA (SHIFTS) ---
         int capacidadBaseTotal = workingDays.size() * SHIFTS_BASE_POR_LABORABLE;
         
         log.info("ANÁLISIS DE CAPACIDAD: Se necesitan mínimo {} huecos de Cont. Asist. La base (2/día) ofrece {}.", 
-                 totalMinShiftsNecesarios, capacidadBaseTotal);
+                totalMinShiftsNecesarios, capacidadBaseTotal);
 
         if (totalMinShiftsNecesarios > capacidadBaseTotal) {
             int deficit = totalMinShiftsNecesarios - capacidadBaseTotal;
@@ -132,7 +154,7 @@ public class OptaplannerGuardians {
             }
         }
 
-        // --- 5. CREACIÓN FÍSICA DE LOS OBJETOS ---
+        // --- CREACIÓN FÍSICA DE LOS OBJETOS ---
         Schedule sch = new Schedule();
         sch.setId(pk);
         sch.setCalendar(cal);
@@ -151,12 +173,12 @@ public class OptaplannerGuardians {
         // Bucle principal de creación
         for (DayConfiguration dc : cal.getDayConfigurations()) {
             
-            // A. Guardias (Fijo: 2 por día)
+            // Guardias (Fijo: 2 por día)
             for (int k = 0; k < GUARDIAS_POR_DIA; k++) {
                 shiftsToSave.add(createShift(dc, "GUARDIA", false, false));
             }
 
-            // B. Shifts / Cont. Asist (Dinámico según el mapa calculado arriba)
+            // Shifts / Cont. Asist (Dinámico según el mapa calculado arriba)
             // Si es festivo, el mapa devolverá 0. Si es laborable, devolverá 2, 3, o los que toquen.
             int numShiftsHoy = shiftsPerDayMap.getOrDefault(dc.getDay(), 0);
             for (int k = 0; k < numShiftsHoy; k++) {
@@ -164,7 +186,7 @@ public class OptaplannerGuardians {
             }
         }
 
-        // C. Consultas (Distribución en huecos libres laborables)
+        // Consultas (Distribución en huecos libres laborables)
         // Re-barajamos para que no coincida necesariamente con donde pusimos los shifts extra
         Collections.shuffle(workingDays);
         int consultasCreadas = 0;
@@ -180,7 +202,7 @@ public class OptaplannerGuardians {
         List<Shift> managedShifts = this.shiftRepository.saveAll(shiftsToSave);
         this.shiftRepository.flush();
 
-        // --- 6. VINCULACIÓN FINAL (Hibernate Safe) ---
+        // --- VINCULACIÓN FINAL (Hibernate Safe) ---
         
         List<ShiftAssignment> newAssignments = managedShifts.stream()
                 .map(s -> {
