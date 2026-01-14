@@ -467,7 +467,7 @@
       <bpmn2:timerEventDefinition id="_HNOcWknQEe-E2dF2Fr56IA">
       <!-- AQUI ES DONDE HAY QUE CAMBIAR LA CONFIGURACION PARA INICIAR EL PROCESO CUANDO QUERAMOS 
           Si por ejemplo escribimos 0 27 13 * * ? esto quiere decir, que el proceso iniciará a las 13:27 -->
-        <bpmn2:timeCycle xsi:type="bpmn2:tFormalExpression" id="_HNOcW0nQEe-E2dF2Fr56IA" language="cron">0 21 18 * * ?</bpmn2:timeCycle>
+        <bpmn2:timeCycle xsi:type="bpmn2:tFormalExpression" id="_HNOcW0nQEe-E2dF2Fr56IA" language="cron">0 0 12 15 * ?</bpmn2:timeCycle>
       </bpmn2:timerEventDefinition>
     </bpmn2:startEvent>
     <bpmn2:endEvent id="_3BE1ECA9-2559-438F-9695-BFFEA4D7DD6F">
